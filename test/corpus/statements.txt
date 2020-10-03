@@ -1,0 +1,44 @@
+==================
+Hello World
+==================
+
+package main
+
+import "core:fmt"
+
+main :: proc() {
+	fmt.println("Hellope!");
+}
+
+---
+
+(source_file
+  (package_clause (package_identifier))
+  (import_declaration (package_import (collection_identifier) (package_identifier)))
+  (proc_declaration
+    (identifier)
+    (parameter_list)
+    (block
+      (call_expression 
+        (package_identifier) 
+        (identifier)
+        (argument_list
+          (string_literal))))))
+
+==================
+Return statements
+==================
+
+fibonacci :: proc() -> int {
+  return 1;
+}
+
+---
+
+(source_file
+  (proc_declaration
+    (identifier)
+    (parameter_list)
+    (type_identifier)
+    (block
+      (return_statement (int_literal)))))
