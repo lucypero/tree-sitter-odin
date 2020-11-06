@@ -6,8 +6,13 @@ package main
 
 import "core:fmt"
 
+/* In Rust /* we can /* nest comments */ */ */
+
 main :: proc() {
-	fmt.println("Hellope!");
+
+  //comment
+
+	fmt.println("Hellope!"); // hii comment
 }
 
 ---
@@ -15,15 +20,18 @@ main :: proc() {
 (source_file
   (package_clause (package_identifier))
   (import_declaration (package_import (collection_identifier) (package_identifier)))
+	(comment)
   (proc_declaration
     (identifier)
     (parameter_list)
     (block
+			(line_comment)
       (call_expression 
         (package_identifier) 
         (identifier)
         (argument_list
-          (string_literal))))))
+          (string_literal)))
+			(line_comment))))
 
 ==================
 Return statements
@@ -42,3 +50,4 @@ fibonacci :: proc() -> int {
     (type_identifier)
     (block
       (return_statement (int_literal)))))
+

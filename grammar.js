@@ -28,7 +28,18 @@ const
 module.exports = grammar({
   name: 'odin',
 
+  extras: $ => [
+    /\s/,
+    // $.line_comment,
+    $.block_comment,
+  ],
+
+  externals: $ => [
+    $.block_comment,
+  ],
+
   rules: {
+
     source_file: $ => repeat(
       $._top_level_declaration,
     ),
@@ -159,12 +170,38 @@ module.exports = grammar({
     ),
 
 
+    // ----------- Number -----------
+    // https://odin-lang.org/ref/spec/#integer-literals
+    // https://odin-lang.org/docs/overview/#numbers
 
     int_literal: $ => token(intLiteral),
+
 
     number: $ => choice(
       $.int_literal
     ),
+
+    // comment: $ => choice(
+    //   $.line_comment,
+    //   $.block_comment
+    // ),
+
+    // line_comment: $ => token(seq(
+    //   '//', /.*/
+    // )),
+
+    // comment: $ => choice(
+    //   seq('//', /.*/),
+    //   seq('#!', /.*/),
+    //   seq(
+    //     '/*',
+    //     repeat(choice(
+    //       $.comment,
+    //       $.identifier
+    //     )
+    //     ),
+    //     '*/',
+    //   ))
   }
 });
 
