@@ -1,23 +1,68 @@
 const
-  newline = '\n',
+newline = '\n',
   terminator = ';',
 
-  hexDigit = /[0-9a-fA-F]/,
+  binaryDigit = /[01]/,
   octalDigit = /[0-7]/,
   decimalDigit = /[0-9]/,
-  binaryDigit = /[01]/,
+  dozenalDigit = /[0-9a-bA-B]/,
+  hexDigit = /[0-9a-fA-F]/,
 
-  hexDigits = seq(hexDigit, repeat(seq(optional('_'), hexDigit))),
-  octalDigits = seq(octalDigit, repeat(seq(optional('_'), octalDigit))),
-  decimalDigits = seq(decimalDigit, repeat(seq(optional('_'), decimalDigit))),
-  binaryDigits = seq(binaryDigit, repeat(seq(optional('_'), binaryDigit))),
+  binaryDigits = seq(binaryDigit, repeat(seq(repeat('_'), binaryDigit))),
+  octalDigits = seq(octalDigit, repeat(seq(repeat('_'), octalDigit))),
+  decimalDigits = seq(decimalDigit, repeat(seq(repeat('_'), decimalDigit))),
+  dozenalDigits = seq(dozenalDigit, repeat(seq(repeat('_'), dozenalDigit))),
+  hexDigits = seq(hexDigit, repeat(seq(repeat('_'), hexDigit))),
 
-  hexLiteral = seq('0', choice('x', 'X'), optional('_'), hexDigits),
-  octalLiteral = seq('0', optional(choice('o', 'O')), optional('_'), octalDigits),
-  decimalLiteral = choice('0', seq(/[1-9]/, optional(seq(optional('_'), decimalDigits)))),
-  binaryLiteral = seq('0', choice('b', 'B'), optional('_'), binaryDigits),
+  binaryLiteral = seq('0', 'b', repeat('_'), binaryDigits, repeat('_')),
+  octalLiteral = seq('0', 'o', repeat('_'), octalDigits, repeat('_')),
+  decimalLiteral = seq(optional(seq('0', 'd', repeat('_'))), decimalDigits, repeat('_')),
+  dozenalLiteral = seq('0', 'z', repeat('_'), dozenalDigits, repeat('_')),
+  hexLiteral = seq('0', choice('x', 'X'), repeat('_'), hexDigits, repeat('_')),
 
-  intLiteral = choice(binaryLiteral, decimalLiteral, octalLiteral, hexLiteral),
+  intLiteral = choice(binaryLiteral, octalLiteral, decimalLiteral, 
+    dozenalLiteral, hexLiteral),
+
+
+  // float_lit = decimal_float_lit | hexadecimal_float32_lit | hexadecimal_float64_lit .
+  // decimal_float_lit = decimals "." [decimals] [exponent] |
+  //                     decimals exponent |
+  //                     "." decimals [exponent] .
+  // decimals = decimal_digit { decimal_char } .
+  // exponent = ( "e" | "E" ) [ "+" | "-" ] decimals .
+
+  // hexadecimal_float32_lit = "0h" hex_digit hex_char hex_char hex_char
+//                           hex_char hex_char hex_char hex_char .
+  // hexadecimal_float64_lit = "0h" hex_digit hex_char hex_char hex_char
+//                           hex_char hex_char hex_char hex_char
+//                           hex_char hex_char hex_char hex_char
+//                           hex_char hex_char hex_char hex_char .
+
+
+
+  //decimal and hexadecimal
+
+floatNoExp = choice(
+  seq(decimalDigits, repeat('_'), '.', repeat('_'), optional(decimalDigits), repeat('_')),
+  seq(optional(seq(decimalDigits, repeat('_'))), '.', repeat('_'), decimalDigits, repeat('_'))),
+
+  floatDecimal = seq(choice(
+    floatNoExp,
+    seq(decimalDigits, repeat('_'))),
+    optional(seq(
+      choice('e','E'), 
+      optional(choice('+', '-')),
+      repeat('_'),
+      optional(decimalDigits),
+      repeat('_')))),
+
+  hexDigitWithUnderscore = seq(hexDigit, repeat('_')),
+
+  floatHexadecimal32 = seq('0', 'h', repeat('_'), hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore),
+
+  floatHexadecimal64 = seq('0', 'h', repeat('_'), hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore),
+
+  floatLiteral = choice(floatDecimal, floatHexadecimal32, floatHexadecimal64),
 
   unicodeLetter = /[a-zA-Zα-ωΑ-Ωµ]/,
   unicodeDigit = /[0-9]/,
@@ -30,7 +75,7 @@ module.exports = grammar({
 
   extras: $ => [
     /\s/,
-    // $.line_comment,
+    $.line_comment,
     $.block_comment,
   ],
 
@@ -82,11 +127,11 @@ module.exports = grammar({
 
     parameter_list: $ => seq(
       '(',
-      optional(seq(
-        commaSep($.parameter_declaration),
-        optional(',')
-      )),
-      ')'
+        optional(seq(
+          commaSep($.parameter_declaration),
+          optional(',')
+        )),
+        ')'
     ),
 
     parameter_declaration: $ => seq(
@@ -106,29 +151,49 @@ module.exports = grammar({
 
     block: $ => seq(
       '{',
-      repeat($._statement),
-      '}'
+          repeat($._statement),
+          '}'
     ),
 
     // ----------- Statements -----------
 
-    _statement: $ => choice(
-      $.return_statement,
-      $._simple_statement,
+    _statement: $ => prec(5 , choice(
+      seq(choice(
+        $.return_statement,
+        $._simple_statement,
+        $.declaration_statement,
+        $.assignment_statement,
+      ), terminator)
+    )),
+
+    // n : int;
+    declaration_statement : $ => prec(5, seq(
+      $.identifier,
+      ":",
+      $._type_identifier,
+    )),
+
+    assignment_statement : $ => prec(5,seq(
+      $.identifier,
+      "=",
+      choice(
+        $.identifier,
+        $._expression,
+      )
+    )),
+
+    _simple_statement: $ => choice(
+      $._expression,
     ),
 
-    _simple_statement: $ => seq(choice(
-      $._expression,
-    ), terminator),
-
-    return_statement: $ => seq('return', $.int_literal, terminator),
+    return_statement: $ => seq('return', $._expression),
 
 
     // ----------- Expressions -----------
 
     _expression: $ => choice(
       $.call_expression,
-      $.int_literal,
+      $._number,
       $.identifier,
       $.string_literal,
     ),
@@ -161,12 +226,12 @@ module.exports = grammar({
 
     argument_list: $ => seq(
       '(',
-      optional(seq(
-        choice($._expression),
-        repeat(seq(',', choice($._expression))),
-        optional(',')
-      )),
-      ')'
+        optional(seq(
+          choice($._expression),
+          repeat(seq(',', choice($._expression))),
+          optional(',')
+        )),
+        ')'
     ),
 
 
@@ -175,33 +240,22 @@ module.exports = grammar({
     // https://odin-lang.org/docs/overview/#numbers
 
     int_literal: $ => token(intLiteral),
+    float_literal: $=> token(floatLiteral),
 
-
-    number: $ => choice(
-      $.int_literal
+    _number: $ => choice(
+      $.float_literal,
+      $.int_literal,
     ),
 
-    // comment: $ => choice(
-    //   $.line_comment,
-    //   $.block_comment
-    // ),
+    comment: $ => choice(
+      $.line_comment,
+      $.block_comment
+    ),
 
-    // line_comment: $ => token(seq(
-    //   '//', /.*/
-    // )),
+    line_comment: $ => token(seq(
+      '//', /.*/
+    )),
 
-    // comment: $ => choice(
-    //   seq('//', /.*/),
-    //   seq('#!', /.*/),
-    //   seq(
-    //     '/*',
-    //     repeat(choice(
-    //       $.comment,
-    //       $.identifier
-    //     )
-    //     ),
-    //     '*/',
-    //   ))
   }
 });
 

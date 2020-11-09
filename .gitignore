@@ -4,3 +4,4 @@ build
 *.log
 package-lock.json
 *.obj
+*.exe

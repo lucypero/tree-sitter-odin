@@ -6,7 +6,26 @@ package main
 
 import "core:fmt"
 
-/* In Rust /* we can /* nest comments */ */ */
+/*
+
+  Block Comment
+	block comment
+	block comment
+	block comment
+
+  /* nested 
+	   nested nested
+
+    /*nested deep*/
+
+
+	*/
+
+	// line comment in block commnent
+
+*/
+
+//line comment
 
 main :: proc() {
 
@@ -20,7 +39,8 @@ main :: proc() {
 (source_file
   (package_clause (package_identifier))
   (import_declaration (package_import (collection_identifier) (package_identifier)))
-	(comment)
+	(block_comment)
+	(line_comment)
   (proc_declaration
     (identifier)
     (parameter_list)

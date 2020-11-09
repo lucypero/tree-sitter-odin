@@ -23,16 +23,16 @@ static bool is_num_char(int32_t c) {
 bool tree_sitter_odin_external_scanner_scan(void *payload, TSLexer *lexer,
                                             const bool *valid_symbols) {
 
+  while (iswspace(lexer->lookahead)) lexer->advance(lexer, true);
+
   // if (! valid_symbols[BLOCK_COMMENT]) {
   //   return false;
   // }
   // printf("lookahead: %c\ncolumn: %i\nis_included_range_start: %i\n", lexer->lookahead, lexer->get_column(lexer), lexer->is_at_included_range_start(lexer));
 
   if (lexer->lookahead == '/') {
-    printf("/ detected \n");
     advance(lexer);
     if (lexer->lookahead != '*') return false;
-    printf("* detected.. it is a comment\n");
     advance(lexer);
 
     bool after_star = false;
@@ -70,8 +70,6 @@ bool tree_sitter_odin_external_scanner_scan(void *payload, TSLexer *lexer,
       }
     }
   }
-
-  printf("got nothing.. look ahead is %c\n", lexer->lookahead);
 
   return false;
 }
