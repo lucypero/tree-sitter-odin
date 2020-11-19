@@ -4,7 +4,7 @@ import "core:fmt"
 
 main :: proc()
 {
-	imaginary_num();
+	runes();
 
 }
 
@@ -28,8 +28,6 @@ ints :: proc() {
   n = 210206826;
   n = 210_206_415_622_289;
 }
-
-
 
 floats :: proc()
 {
@@ -74,4 +72,74 @@ imaginary_num :: proc()
 	i = 1E9i;
 	i = .125i;
 	i = .12345e+5i;
+}
+
+runes :: proc()
+{
+	r : rune;
+	r = '\a';
+	r = '\b';
+	r = '\e';
+	r = '\f';
+	r = '\n';
+	r = '\r';
+	r = '\t';
+	r = '\v';
+	r = '\\';
+	r = '\'';
+	r = '\"';
+
+	r = '(';
+	fmt.println("unicode char: ", r);
+	r = '\u0028'; // little u value .. '('
+	fmt.println("little u value: ", r);
+	r = '\u007D'; // little u value .. '}'
+	fmt.println("little u value: ", r);
+	fmt.println("little u value: ", r);
+	r = '\U0000007D'; // big u value .. }
+	fmt.println("big u value: ", r);
+	r = '\U0001F600'; // big u value .. 😀
+	fmt.println("big u value: ", r);
+	r = '\U0001F300'; // big u value .. 🌀
+	fmt.println("big u value: ", r);
+	r = '🌀'; // unicode char .. 🌀
+	fmt.println("unicode char: ", r);
+
+	// rune - octal byte value
+	r = '\175'; // }
+	fmt.println("octal byte value: ", r);
+
+	// rune - hex byte value
+	r = '\x7D'; // }
+	fmt.println("hex byte value: ", r);
+}
+
+runes_for_test :: proc()
+{
+	r : rune;
+	r = '\a';
+	r = '\b';
+	r = '\e';
+	r = '\f';
+	r = '\n';
+	r = '\r';
+	r = '\t';
+	r = '\v';
+	r = '\\';
+	r = '\'';
+	r = '\"';
+
+	r = '(';
+	r = '\u0028'; // little u value .. '('
+	r = '\u007D'; // little u value .. '}'
+	r = '\U0000007D'; // big u value .. }
+	r = '\U0001F600'; // big u value .. 😀
+	r = '\U0001F300'; // big u value .. 🌀
+	r = '🌀'; // unicode char .. 🌀
+
+	// rune - octal byte value
+	r = '\175'; // }
+
+	// rune - hex byte value
+	r = '\x7D'; // }
 }

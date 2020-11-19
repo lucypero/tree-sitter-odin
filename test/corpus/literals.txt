@@ -264,3 +264,118 @@ imaginary_num :: proc()
       (assignment_statement
         (identifier)
         (imaginary_literal)))))
+
+
+==================
+Rune Literals
+==================
+
+runes_for_test :: proc()
+{
+	r : rune;
+	r = '\a';
+	r = '\b';
+	r = '\e';
+	r = '\f';
+	r = '\n';
+	r = '\r';
+	r = '\t';
+	r = '\v';
+	r = '\\';
+	r = '\'';
+	r = '\"';
+
+	r = '(';
+	r = '\u0028'; // little u value .. '('
+	r = '\u007D'; // little u value .. '}'
+	r = '\U0000007D'; // big u value .. }
+	r = '\U0001F600'; // big u value .. 😀
+	r = '\U0001F300'; // big u value .. 🌀
+	r = '🌀'; // unicode char .. 🌀
+
+	// rune - octal byte value
+	r = '\175'; // }
+
+	// rune - hex byte value
+	r = '\x7D'; // }
+}
+
+---
+
+ (source_file (proc_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block
+      (declaration_statement
+        (identifier)
+        (type_identifier))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment)
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (rune_literal))
+      (line_comment))))

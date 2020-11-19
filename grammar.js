@@ -95,10 +95,45 @@ floatNoExp = choice(
 
   imaginaryLiteral = seq(choice(decimals, floatLiteral), 'i');
 
+// Runes
+
+
+// newline        = /* the Unicode code point U+000A */
+// unicode_char   = /* an arbitrary Unicode code point except newline */
+// unicode_letter = /* a Unicode code point classified as "Letter" */
+// unicode_digit  = /* a Unicode code point classified as "Number, decimal digit" */
+
+// rune_lit         = "'" ( unicode_value | byte_value ) "'" .
+// unicode_value    = unicode_char | little_u_value | big_u_value | escaped_char .
+// byte_value       = octal_byte_value | hex_byte_value .
+// octal_byte_value = `\` octal_digit octal_digit octal_digit .
+// hex_byte_value   = `\` "x" hex_digit hex_digit .
+// little_u_value   = `\` "u" hex_digit hex_digit hex_digit hex_digit .
+// big_u_value      = `\` "U" hex_digit hex_digit hex_digit hex_digit
+//                            hex_digit hex_digit hex_digit hex_digit .
+// escaped_char     = `\` ( "a" | "b" | "e" | f" | "n" | "r" | "t" | "v" | `\` | "'" | `"` ) .
+
+
+// rune // signed 32 bit integer
+//      // represents a Unicode code point
+//      // is a distinct type to `i32`
+
+  unicodeChar = /./,
   unicodeLetter = /[a-zA-Zα-ωΑ-Ωµ]/,
   unicodeDigit = /[0-9]/,
-  unicodeChar = /./,
-  unicodeValue = unicodeChar,
+
+  littleUValue = seq('\\', 'u', hexDigit, hexDigit, hexDigit, hexDigit),
+  bigUValue = seq('\\', 'U', hexDigit, hexDigit, hexDigit, hexDigit, 
+                             hexDigit, hexDigit, hexDigit, hexDigit),
+  escapedChar = seq('\\', choice('a', 'b', 'e', 'f', 'n', 'r', 't', 'v', '\\', "'", '"')),
+  unicodeValue = choice(unicodeChar, littleUValue, bigUValue, escapedChar),
+
+  octalByteValue = seq('\\', octalDigit, octalDigit, octalDigit),
+  hexByteValue = seq('\\', 'x', hexDigit, hexDigit),
+  byteValue = choice(octalByteValue, hexByteValue),
+
+  runeLiteral = seq("'",choice(unicodeValue, byteValue),"'"),
+
   letter = choice(unicodeLetter, '_')
 
 module.exports = grammar({
@@ -227,6 +262,7 @@ module.exports = grammar({
       $._number,
       $.identifier,
       $.string_literal,
+      $.rune_literal,
     ),
 
     string_literal: $ => seq(
@@ -279,6 +315,8 @@ module.exports = grammar({
       $.int_literal,
       $.imaginary_literal,
     ),
+
+    rune_literal: $ => token(runeLiteral),
 
     comment: $ => choice(
       $.line_comment,

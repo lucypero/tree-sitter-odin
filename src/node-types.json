@@ -28,6 +28,10 @@
           "named": true
         },
         {
+          "type": "rune_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         }
@@ -60,6 +64,10 @@
         },
         {
           "type": "int_literal",
+          "named": true
+        },
+        {
+          "type": "rune_literal",
           "named": true
         },
         {
@@ -107,6 +115,10 @@
         },
         {
           "type": "return_statement",
+          "named": true
+        },
+        {
+          "type": "rune_literal",
           "named": true
         },
         {
@@ -336,6 +348,10 @@
           "named": true
         },
         {
+          "type": "rune_literal",
+          "named": true
+        },
+        {
           "type": "string_literal",
           "named": true
         }
@@ -471,6 +487,10 @@
   {
     "type": "return",
     "named": false
+  },
+  {
+    "type": "rune_literal",
+    "named": true
   },
   {
     "type": "type_identifier",
