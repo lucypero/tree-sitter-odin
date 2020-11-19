@@ -382,21 +382,6 @@
     }
   },
   {
-    "type": "string_literal",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "escape_sequence",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "\"",
     "named": false
   },
@@ -445,10 +430,6 @@
     "named": true
   },
   {
-    "type": "escape_sequence",
-    "named": true
-  },
-  {
     "type": "float_literal",
     "named": true
   },
@@ -490,6 +471,10 @@
   },
   {
     "type": "rune_literal",
+    "named": true
+  },
+  {
+    "type": "string_literal",
     "named": true
   },
   {

@@ -379,3 +379,37 @@ runes_for_test :: proc()
         (identifier)
         (rune_literal))
       (line_comment))))
+
+
+==================
+String Literals
+==================
+
+strings :: proc()
+{
+
+	str : string;
+	str = "hiiii 🌀🌀🌀jean";
+	str = ` test jwajaja
+
+	awjdiawda
+	jiawdwa
+
+	`;
+}
+
+---
+
+(source_file (proc_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block
+      (declaration_statement
+        (identifier)
+        (type_identifier))
+      (assignment_statement
+        (identifier)
+        (string_literal))
+      (assignment_statement
+        (identifier)
+        (string_literal)))))

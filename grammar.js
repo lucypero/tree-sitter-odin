@@ -1,5 +1,4 @@
 const
-newline = '\n',
   terminator = ';',
 
 // |   alternation
@@ -134,6 +133,22 @@ floatNoExp = choice(
 
   runeLiteral = seq("'",choice(unicodeValue, byteValue),"'"),
 
+
+// strings
+
+// string_lit             = raw_string_lit | interpreted_string_lit .
+// raw_string_lit         = "`" { unicode_char | newline } "`" .
+// interpreted_string_lit = `"` { unicode_value | byte_value } `"` .
+
+
+  newline = /\n/,
+
+  rawStringLiteral = seq('`', repeat(choice(unicodeChar, newline)),'`'),
+  interpretedStringLiteral = seq('"', repeat(choice(unicodeValue, byteValue)), '"'),
+
+  stringLiteral = choice(rawStringLiteral, interpretedStringLiteral),
+  // stringLiteral = interpretedStringLiteral,
+
   letter = choice(unicodeLetter, '_')
 
 module.exports = grammar({
@@ -261,17 +276,8 @@ module.exports = grammar({
       $.call_expression,
       $._number,
       $.identifier,
-      $.string_literal,
       $.rune_literal,
-    ),
-
-    string_literal: $ => seq(
-      '"',
-      repeat(choice(
-        token.immediate(prec(1, /[^"\n\\]+/)),
-        $.escape_sequence
-      )),
-      '"'
+      $.string_literal,
     ),
 
     escape_sequence: $ => token.immediate(seq(
@@ -317,6 +323,7 @@ module.exports = grammar({
     ),
 
     rune_literal: $ => token(runeLiteral),
+    string_literal: $ => token(stringLiteral),
 
     comment: $ => choice(
       $.line_comment,

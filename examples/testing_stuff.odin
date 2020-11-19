@@ -4,7 +4,7 @@ import "core:fmt"
 
 main :: proc()
 {
-	runes();
+  strings();
 
 }
 
@@ -143,3 +143,18 @@ runes_for_test :: proc()
 	// rune - hex byte value
 	r = '\x7D'; // }
 }
+
+strings :: proc()
+{
+
+	str : string;
+	str = "hiiii 🌀🌀🌀jean";
+	str = ` test jwajaja
+
+	awjdiawda
+	jiawdwa
+
+	`;
+}
+
+
