@@ -20,6 +20,10 @@
           "named": true
         },
         {
+          "type": "imaginary_literal",
+          "named": true
+        },
+        {
           "type": "int_literal",
           "named": true
         },
@@ -48,6 +52,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "imaginary_literal",
           "named": true
         },
         {
@@ -87,6 +95,10 @@
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "imaginary_literal",
           "named": true
         },
         {
@@ -316,6 +328,10 @@
           "named": true
         },
         {
+          "type": "imaginary_literal",
+          "named": true
+        },
+        {
           "type": "int_literal",
           "named": true
         },
@@ -422,6 +438,10 @@
   },
   {
     "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "imaginary_literal",
     "named": true
   },
   {

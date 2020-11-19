@@ -2,12 +2,38 @@ const
 newline = '\n',
   terminator = ';',
 
+// |   alternation
+// ()  grouping
+// []  option (0 or 1 times)
+// {}  repetition (0 to n times)
+
+// letter        = unicode_letter | "_" .
+// binary_digit  = "0" … "1" .
+// octal_digit   = "0" … "7" .
+// decimal_digit = "0" … "9" .
+// dozenal_digit = "0" … "9" | "A" … "B" | "a" … "b" .
+// hex_digit     = "0" … "9" | "A" … "F" | "a" … "f" .
+
+// binary_char  = binary_digit  | "_" .
+// octal_char   = octal_digit   | "_" .
+// decimal_char = decimal_digit | "_" .
+// dozenal_char = dozenal_digit | "_" .
+// hex_char     = hex_digit     | "_" .
+
+// decimals = decimal_digit { decimal_char } .
+
+
   binaryDigit = /[01]/,
   octalDigit = /[0-7]/,
   decimalDigit = /[0-9]/,
   dozenalDigit = /[0-9a-bA-B]/,
   hexDigit = /[0-9a-fA-F]/,
 
+  decimalChar = choice(decimalDigit, '_'),
+
+  decimals = seq(decimalDigit, repeat(decimalChar))
+
+// NOTE(lucypero): I did integer and floating point literals before reading the spec well, so they are unnecessarily complicated... could do a rewrite
   binaryDigits = seq(binaryDigit, repeat(seq(repeat('_'), binaryDigit))),
   octalDigits = seq(octalDigit, repeat(seq(repeat('_'), octalDigit))),
   decimalDigits = seq(decimalDigit, repeat(seq(repeat('_'), decimalDigit))),
@@ -63,6 +89,11 @@ floatNoExp = choice(
   floatHexadecimal64 = seq('0', 'h', repeat('_'), hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore, hexDigitWithUnderscore),
 
   floatLiteral = choice(floatDecimal, floatHexadecimal32, floatHexadecimal64),
+
+
+// imaginary_lit = (decimals | float_lit) "i" .
+
+  imaginaryLiteral = seq(choice(decimals, floatLiteral), 'i');
 
   unicodeLetter = /[a-zA-Zα-ωΑ-Ωµ]/,
   unicodeDigit = /[0-9]/,
@@ -241,10 +272,12 @@ module.exports = grammar({
 
     int_literal: $ => token(intLiteral),
     float_literal: $=> token(floatLiteral),
+    imaginary_literal: $=> token(imaginaryLiteral),
 
     _number: $ => choice(
       $.float_literal,
       $.int_literal,
+      $.imaginary_literal,
     ),
 
     comment: $ => choice(

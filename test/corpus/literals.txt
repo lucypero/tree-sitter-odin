@@ -200,3 +200,67 @@ floats :: proc()
       (assignment_statement
         (identifier)
         (float_literal)))))
+
+==================
+Imaginary Literals
+==================
+
+imaginary_num :: proc()
+{
+	i : complex128;
+	i = 0.i;
+	i = 0.0i;
+	i = 42.36i;
+	i = 042.36i;  // == 42.36i
+	i = 6.28318530718i;
+	i = 1.e+0i;
+	i = 1.054571800e-34i;
+	i = 1.054_571_800e-34i;
+	i = 1E9i;
+	i = .125i;
+	i = .12345e+5i;
+}
+
+---
+
+(source_file (proc_declaration
+    name: (identifier)
+    parameters: (parameter_list)
+    body: (block
+      (declaration_statement
+        (identifier)
+        (type_identifier))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (line_comment)
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal))
+      (assignment_statement
+        (identifier)
+        (imaginary_literal)))))
