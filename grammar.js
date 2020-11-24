@@ -149,7 +149,17 @@ floatNoExp = choice(
   stringLiteral = choice(rawStringLiteral, interpretedStringLiteral),
   // stringLiteral = interpretedStringLiteral,
 
-  letter = choice(unicodeLetter, '_')
+  letter = choice(unicodeLetter, '_'),
+
+
+
+
+   
+  
+
+  
+
+
 
 module.exports = grammar({
   name: 'odin',
@@ -334,6 +344,183 @@ module.exports = grammar({
       '//', /.*/
     )),
 
+    // ----------- Operators -----------
+
+    // binary_op  = "||" | "&&" | rel_op | add_op | mul_op | contain_op .
+    // range_op   = ".." | "..<" .
+    // rel_op     = "==" | "!=" | "<" | "<=" | ">" | ">=" .
+    // contain_op =  "in" | "not_in" .
+    // add_op     = "+" | "-" | "|" | "~"  .
+    // mul_op     = "*" | "/" | "%" | "%%" | "<<" | ">>" | "&" | "&~" .
+
+    range_op: $ => token(choice('..', '..<')),
+    rel_op: $ => choice('==', '!=', '<', '<=', '>', '>='),
+    contain_op: $ => choice('in', 'not_in'),
+    add_op: $ => choice('+', '-', '|', '~'),
+    mul_op: $ => choice('*', '/', '%', '%%', '<<', '>>', '&', '&~'),
+
+    binary_op: $ => choice('||', '&&', $.rel_op, $.add_op, $.mul_op, $.contain_op),
+
+    // ----------- Types -----------
+
+// Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
+// TypeName = identifier | PolymorphicName .
+// TypeLit = "typeid" |
+//           ArrayType | SliceType | DynamicArrayType | MapType |
+//           StructType | UnionType | EnumType | BitFieldType |
+//           PointerType | ProcedureType |
+//           BitSetType |
+//           OpaqueType |
+//           SimdVectorType |
+//           RelativePointerType | RelativeSliceType .
+
+// HelperType = "#" "type" Type .
+// TypeOrWithSpecialization = Type | ( ("typeid" | PolymorphicName) "/" TypeOrWithSpecialization )
+
+    _array_length: $ => alias($._expression, $.array_length),
+    _enumerated_array_type: $ => alias($.type, $.enumerated_array_type),
+    _element_type: $ => alias($.type, $.element_type),
+    array_type: $ => seq(optional('#partial'), '[' , choice($._array_length, $._enumerated_array_type), ']', $._element_type),
+
+    slice_type: $ => seq('[]', $.type),
+    dynamic_array_type: $ => seq('[dynamic]', $.type),
+    map_type: $ => seq('map', '[', $.type, ']', $.type),
+    pointer_type: $ => seq('^', $.type),
+    bitset_key_type: $ => choice($.type, seq($._expression, $.range_op, $._expression)),
+    bitset_type: $ => seq('bit_set', '[', $.bitset_key_type, optional(seq(';', $.type)), ']'),
+    opaque_type: $ => seq('opaque', $.type),
+    simd_vector_type: $ => choice($.array_type, seq('#', 'simd', $.array_type)),
+    relative_pointer_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.pointer_type),
+    relative_slice_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.slice_type),
+
+
+    // NOTE(lucypero): struct type
+
+    //identifier list (put this somewhere else)
+// IdentifierList = identifier { "," identifier } .
+    identifier_list: $ => seq($.identifier, repeat(seq(',', $.identifier))),
+
+//expression list (put this somewhere else)
+// ExpressionList = Expression { "," Expression } .
+    expression_list: $ => seq($._expression, repeat(seq(',', $._expression))),
+
+
+// WhereClause = "where" ExpressionList .
+    where_clause: $ => seq('where', $.expression_list),
+
+
+// PolymorphicParameter = (IdentifierList | PolymorphicNameList) [":"] TypeOrWithSpecialization .
+// PolymorphicParameterList = "(" PolymorphicParameter { "," PolymorphicParameter } [ "," ] ")" .
+
+// PolymorphicName = "$" identifier .
+// PolymorphicNameList = PolymorphicName { "," PolymorphicName } .
+
+    polymorphic_name : $ => seq('$', $.identifier),
+    polymorphic_name_list : $ => seq($.polymorphic_name, repeat(seq(',', $.polymorphic_name))),
+
+// TypeOrWithSpecialization = Type | ( ("typeid" | PolymorphicName) "/" TypeOrWithSpecialization ) .
+    type_or_with_specialization : $ => choice($.type, seq(choice('typeid', $.polymorphic_name), '/', $.type_or_with_specialization)),
+
+    polymorphic_parameter : $ => seq(choice($.identifier_list, $.polymorphic_name_list), ':', $.type_or_with_specialization),
+    polymorphic_parameter_list: $ => seq('(', $.polymorphic_parameter, repeat(seq(',', $.polymorphic_parameter)), optional(','), ')'),
+
+//     StructTypeTags = [ ( "#" "align" Expression ) | ("#" "packed") | ("#" "raw_union") ] .
+//     UnionTypeTags  = [ ( "#" "align" Expression ) | ("#" "no_nil") |("#" "maybe") ] .
+//     BitFieldTags   = [ ( "#" "align" Expression ) ] .
+//     StructFieldDecl = ( [ ("using") ]  IdentifierList ":" Type ) .
+//     StructFieldList = StructFieldDecl { "," StructFieldDecl } .
+//     Element = identifier [ "=" Expression ] .
+//     ElementList = Element { "," Element } .
+//     StructType = "struct" [PolymorphicParameterList] [StructTypeTags] [WhereClause] "{" StructFieldList [ "," ] "}" .
+//     UnionType  = "union"  [PolymorphicParameterList] [UnionTypeTags] [WhereClause]  "{" ExpressionList  [ "," ] "}" .
+//     EnumType   = "enum" [ Type ] "{" ElementList [ "," ] "}" .
+    struct_type_tags : $ => optional(choice(seq('#', 'align', $._expression), seq('#', 'packed'), seq('#', 'raw_union'))),
+    union_type_tags : $ => optional(choice(seq('#', 'align', $._expression), seq('#', 'no_nil'), seq('#', 'maybe'))),
+    bitfield_tags : $ => optional(seq('#', 'align', $._expression)),
+    struct_field_decl : $ => seq(optional('using'), $.identifier_list, ':', $.type),
+    struct_field_list : $ => seq($.struct_field_decl, repeat(seq(',', $.struct_field_decl))),
+    element : $ => seq($.identifier, optional(seq('=', $._expression))),
+    element_list : $ => seq($.element, repeat(seq(',', $.element))),
+    struct_type : $ => seq('struct', optional($.polymorphic_parameter_list),
+                                     optional($.struct_type_tags),
+                                     optional($.where_clause),
+                            '{', $.struct_field_list, optional(','), '}'),
+    union_type : $ => seq('union', optional($.polymorphic_parameter_list),
+                                     optional($.union_type_tags),
+                                     optional($.where_clause),
+                            '{', $.expression_list, optional(','), '}'),
+    enum_type : $ => seq('enum', optional($.type), '{', $.element_list, optional(','), '}'),
+
+
+// BitFieldField = IdentifierList ":" Expression .
+// BitFieldFieldList = BitFieldField { "," BitFieldField } .
+// BitFieldFields = [ BitFieldFieldList [ "," ] ] .
+// BitFieldType = "bit_field" (BitFieldTags) "{" BitFieldFields "}" .
+
+    bitfield_field : $ => seq($.identifier_list, ':', $._expression),
+    bitfield_field_list : $ => seq($.bitfield_field, repeat(seq(',', $.bitfield_field))),
+    bitfield_fields : $ => optional(seq($.bitfield_field_list, optional(','))),
+    bitfield_type : $ => seq('bit_field', $.bitfield_tags, '{', $.bitfield_fields, '}'),
+
+// ProcedureTags = "#" "optional_ok" .
+// ProcedureType = "proc" Signature .
+    // NOTE(lucypero): what is this.. i think this is not written well
+// Signature = Parameters | [ "->" Result ] [ ProcedureTags ] .
+    procedure_tags : $ => seq('#', 'optional_ok'),
+    procedure_type : $ => seq('proc', $.signature),
+
+    // NOTE(lucypero): this might be wrong
+    signature : $ => choice($.parameters, optional(seq('->', $.result)), optional($.procedure_tags)),
+
+// Result = PlainParameters | Type .
+
+    result : $ => choice($.plain_parameters, $.type),
+
+// Parameters = "(" [ ParameterList [","] ] ")" .
+// ParameterList = ParameterDecl { "," ParameterDecl } .
+// ParameterPrefixes = "using" | ("#" "no_alias") | ("#" "c_vararg") | "auto_cast" | ("#" "const") .
+// ParameterDecl = [ [ParameterPrefixes]  (IdentifierList | PolymorphicNameList) [ [":"] ".." TypeOrWithSpecialization ] ] .
+
+    parameters : $ => seq('(', optional(seq($.parameter_list, optional(','))), ')'),
+    parameter_list : $ => seq($.parameter_decl, repeat(seq(',', $.parameter_decl))),
+    parameter_prefixes : $ => choice('using', seq('#', 'no_alias'), seq('#', 'c_vararg'), 'auto_cast', seq('#', 'const')),
+    parameter_decl : $ => optional(seq(optional($.parameter_prefixes), choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization)))),
+
+// PlainParameters = "(" [ PlainParameterList [","] ] ")" .
+// PlainParameterList = PlainParameterDecl { "," PlainParameterDecl } .
+// PlainParameterDecl = [ (IdentifierList | PolymorphicNameList) [ [":"] ".." TypeOrWithSpecialization ] ] .
+
+    plain_parameters : $ => seq('(', optional(seq($.plain_parameter_list, optional(','))), ')'),
+    plain_parameter_list : $ => seq($.plain_parameter_decl, repeat(seq(',', $.plain_parameter_decl))),
+    plain_parameter_decl : $ => optional(seq(choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization)))),
+
+
+// HelperType = "#" "type" Type .
+    helper_type : $ => seq('#', 'type', $.type),
+
+    // NOTE(lucypero): bill says this is old and will be removed i think
+    _qualified_identifier : $ => alias($.identifier, $.qualified_identifier),
+
+    type_name: $ => choice($.identifier, $._qualified_identifier),
+
+
+    // TODO(lucypero): 
+
+// TypeLit = "typeid" |
+//           ArrayType | SliceType | DynamicArrayType | MapType |
+//           StructType | UnionType | EnumType | BitFieldType |
+//           PointerType | ProcedureType |
+//           BitSetType |
+//           OpaqueType |
+//           SimdVectorType |
+//           RelativePointerType | RelativeSliceType .
+
+    type_literal: $ => choice('typeid', $.array_type, $.slice_type, $.dynamic_array_type,
+      $.map_type, $.struct_type, $.union_type, $.enum_type, $.bitfield_type,
+      $.pointer_type, $.procedure_type, $.bitset_type, 
+      $.opaque_type, $.simd_vector_type, $.relative_pointer_type, $.relative_slice_type),
+
+    type: $ => choice($.type_name, $.type_literal, seq("(", $.type, ")"), $.helper_type),
   }
 });
 

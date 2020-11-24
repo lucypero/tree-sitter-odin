@@ -4,7 +4,7 @@ import "core:fmt"
 
 main :: proc()
 {
-  strings();
+  types();
 
 }
 
@@ -157,4 +157,96 @@ strings :: proc()
 	`;
 }
 
+types :: proc()
+{
+
+	a : (int);
+
+	a = 3;
+	fmt.println(a);
+
+	// Array Types
+  {
+    ar : [32]byte;
+  }
+	// [2*N + 1]union{int, string}
+	// [42]^f32
+	// [2][3]int
+	// [3][3][3]f64 // same as [3]([3]([3]f64))
+
+
+  // "typeid"
+  {
+    ar : [32]byte;
+  }
+
+  // SliceType
+  {
+    ar : typeid;
+  }
+
+  // DynamicArrayType
+  {
+    ar : [dynamic]byte;
+  }
+  // MapType
+  {
+    ar : map[int]int;
+  }
+
+
+  // TODO(lucypero): keep doing this
+
+  // StructType
+  {
+    ar : [32]byte;
+  }
+  // UnionType
+  {
+    ar : [32]byte;
+  }
+  // EnumType
+  {
+    ar : [32]byte;
+  }
+  // BitFieldType
+  {
+    ar : [32]byte;
+  }
+
+  // PointerType
+  {
+    ar : [32]byte;
+  }
+  // ProcedureType
+  {
+    ar : [32]byte;
+  }
+
+  // BitSetType
+  {
+    ar : [32]byte;
+  }
+
+  // OpaqueType
+  {
+    ar : [32]byte;
+  }
+
+  // SimdVectorType
+  {
+    ar : [32]byte;
+  }
+
+  // RelativePointerType
+  {
+    ar : [32]byte;
+  }
+  // RelativeSliceType .
+  {
+    ar : [32]byte;
+  }
+
+
+}
 
