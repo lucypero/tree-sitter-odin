@@ -250,3 +250,5 @@ types :: proc()
 
 }
 
+
+awdad :: proc() -> (e : int) { e = 1; return;}

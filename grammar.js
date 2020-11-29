@@ -176,147 +176,186 @@ module.exports = grammar({
 
   rules: {
 
-    source_file: $ => repeat(
-      $._top_level_declaration,
-    ),
+// SourceFile = PackageDecl ";" { TopLevelDecl ";" } .
+    source_file: $ => seq($.package_decl, ';', repeat(seq($._top_level_decl, ';'))),
 
-    _top_level_declaration: $ => choice(
-      $.package_clause,
-      $.import_declaration,
-      $.proc_declaration,
-    ),
+// PackageDecl = "package" PackageName .
+// PackageName = identifier .
+    package_decl: $ => seq('package', $.package_name),
+    _package_name: $ => alias($.identifier, $.package_name),
 
-    package_clause: $ => seq(
-      'package',
-      $._package_identifier
-    ),
+// TopLevelDecl = ( { Attribute } (ImportDecl | ValueDecl | ForeignBlockDecl | ForeignImportDecl) ) |
+//                 ConstAssertPanic .
+    _top_level_decl: $ => choice(choice(repeat($.attribute), choice($.import_decl, $.value_decl, $.foreign_block_decl, $.foreign_import_decl)), $.const_assert_panic),
 
-    import_declaration: $ => seq(
-      'import',
-      '"',
-      $.package_import,
-      '"',
-    ),
+// ConstAssertPanic = "#" ( "assert" | "panic" ) Arguments .
+// ImportDecl = "import" [ PackageName ] ImportPath .
+// ImportPath = string_lit .
+// ForeignImportDecl = "foreign" "import" [ PackageName ] (ImportPath | ForeignImportPaths ) .
+// ForeignImportPaths = "{" [ ForeignImportPathList [ "," ] ] "}" .
+// ForeignImportPathList = ImportPath { "," ImportPath } .
 
-    package_import: $ => seq(
-      field('collection', $._collection_identifier),
-      ':',
-      field('package', $._package_identifier),
-    ),
+    const_assert_panic: $ => seq('#', choice('assert', 'panic'), $.arguments),
+    import_decl: $ => seq('import', optional($.package_name), $.import_path),
+    _import_path: $ => alias($.string_lit, $.import_path),
+    foreign_import_decl: $ => seq('foreign', 'import', optional($.package_name), optional($.import_path, $.foreign_import_paths)),
+    foreign_import_paths: $ => seq('{', optional(seq($.foreign_import_path_list, optional(','))), '}'),
+    foreign_import_path_list: $ => seq($._import_path, repeat(seq(',', $._import_path))),
 
-    proc_declaration: $ => prec.right(1,seq(
-      field('name', $.identifier),
-      '::',
-      'proc',
-      field('parameters', $.parameter_list),
-      optional(seq(
-        '->',
-        field('result', $._type_identifier)
-      )),
-      field('body', $.block)
-    )),
+// ForeignBlockDecl = "foreign" [ identifier ] "{" { { Attribute } ValueDecl } "}" .
+    foreign_block_decl: $ => seq('foreign', optional($.identifier), '{', repeat(seq(repeat($.attribute), $.value_decl)), '}'),
 
-    parameter_list: $ => seq(
-      '(',
-        optional(seq(
-          commaSep($.parameter_declaration),
-          optional(',')
-        )),
-        ')'
-    ),
-
-    parameter_declaration: $ => seq(
-      $.identifier,
-      ':',
-      $._type_identifier,
-    ),
-
-    identifier: $ => token(seq(
-      letter,
-      repeat(choice(letter, unicodeDigit))
-    )),
+    identifier: $ => token(seq( letter, repeat(choice(letter, unicodeDigit)))),
 
     _type_identifier: $ => alias($.identifier, $.type_identifier),
     _package_identifier: $ => alias($.identifier, $.package_identifier),
     _collection_identifier: $ => alias($.identifier, $.collection_identifier),
 
-    block: $ => seq(
-      '{',
-          repeat($._statement),
-          '}'
-    ),
-
     // ----------- Statements -----------
-
-    _statement: $ => prec(5 , choice(
-      seq(choice(
-        $.return_statement,
-        $._simple_statement,
-        $.declaration_statement,
-        $.assignment_statement,
-      ), terminator)
-    )),
-
-    // n : int;
-    declaration_statement : $ => prec(5, seq(
-      $.identifier,
-      ":",
-      $._type_identifier,
-    )),
-
-    assignment_statement : $ => prec(5,seq(
-      $.identifier,
-      "=",
-      choice(
-        $.identifier,
-        $._expression,
-      )
-    )),
-
-    _simple_statement: $ => choice(
-      $._expression,
-    ),
-
-    return_statement: $ => seq('return', $._expression),
 
 
     // ----------- Expressions -----------
 
-    _expression: $ => choice(
-      $.call_expression,
-      $._number,
-      $.identifier,
-      $.rune_literal,
-      $.string_literal,
-    ),
 
-    escape_sequence: $ => token.immediate(seq(
-      '\\',
-      choice(
-        /[^xuU]/,
-        /\d{2,3}/,
-        /x[0-9a-fA-F]{2,}/,
-        /u[0-9a-fA-F]{4}/,
-        /U[0-9a-fA-F]{8}/
-      )
-    )),
+// ProcedureLitTags = "#" ("bounds_check" | "no_bounds_check") .
+// ProcedureLit = "proc" Signature [ProcedureLitTags] ProcedureBody .
+// ProcedureBody = Block .
+    procedure_lit_tags: $ => seq('#', choice('bounds_check', 'no_bounds_check')),
+    procedure_lit: $ => seq('proc', $.signature, optional($.procedure_lit_tags), $.procedure_body),
+    _procedure_body: $ => alias($.block, $.procedure_body),
 
-    call_expression: $ => seq(
-      optional(seq($._package_identifier,'.')),
-      field('function', $.identifier),
-      field('arguments', $.argument_list)
-    ),
+// Block = "{" StatementList "}" .
+    block: $ => seq('{', $.statement_list, '}'),
+// StatementList = { Statement ";" } .
+    statement_list: $ => repeat(seq($.statement, ';')),
 
-    argument_list: $ => seq(
-      '(',
-        optional(seq(
-          choice($._expression),
-          repeat(seq(',', choice($._expression))),
-          optional(',')
-        )),
-        ')'
-    ),
 
+// Statement =
+// 	LabeledStmt | SimpleStmt | ReturnStmt | BreakStmt | ContinueStmt | FallthroughStmt |
+// 	Block | IfStmt | SwitchStmt | ForStmt | InlineRangeStmt | WhenStmt | DeferStmt | UsingStmt |
+// 	TagStmt | DeclStmt .
+
+// SimpleStmt = EmptyStmt | ExpressionStmt | Assignment | ValueDecl .
+
+// ReturnStmt = "return" ExpressionList .
+    return_stmt: $ => seq('return', $.expression_list),
+
+    // TODO(lucypero): do the others later... only simpleStatement for now
+    statement: $ => choice($.simple_stmt, $.decl_stmt, $.return_stmt),
+
+// NOTE(lucypero): can't have this.. this matches the empty string..
+// EmptyStmt = .
+
+// ExpressionStmt = Expression .
+// Assignment = ExpressionList assign_op ExpressionList .
+
+// assign_op = [ add_op | mul_op ] "=" .
+
+    assign_op : $ => seq(optional(choice($.add_op, $.mul_op)), '='),
+
+    _expression_stmt : $ => alias($.expression, $.expression_stmt),
+    assignment : $ => seq($.expression_list, $.assign_op, $.expression_list),
+
+// ProcedureGroup = "proc" "{" ExpressionList [ "," ]  "}" .
+    procedure_group : $ => seq('proc', '{', $.expression_list, optional(','), '}'),
+
+// ConstExpression = Expression | ProcedureGroup | "distinct" Type | "(" ConstExpression ")" .
+// ConstExpressionList = ConstExpression { "," ConstExpression } .
+    const_expression : $ => choice($._expression, $.procedure_group, seq('distinct', $.type), seq('(', $.const_expression, ')')),
+    const_expression_list : $ => seq($.const_expression, repeat(seq(','), $.const_expression)),
+
+// ConstDecl = IdentifierList ":" [ Type ] ":" ConstExpressionList .
+// VarDecl   = IdentifierList ":" [ Type ] [ "=" ExpressionList ].
+// ValueDecl    = ConstDecl | VarDecl .
+
+    const_decl : $ => seq($.identifier_list, ':', optional($.type), ':', $.const_expression_list),
+    var_decl : $ => seq($.identifier_list, ':', optional($.type), optional(seq('=', $.expression_list))),
+    value_decl : $ => choice($.const_decl, $.var_decl),
+
+    simple_stmt: $ => choice($._expression_stmt, $.assignment, $.value_decl),
+
+// Attribute = "@" identifier | "@" Arguments .
+    attribute: $ => optional(seq('@', $.identifier), seq('@', $.arguments)),
+
+    // DeclStmt = { Attribute } ValueDecl .
+    decl_stmt: $ => seq(repeat($.attribute), $.value_decl),
+
+    // old.. replace - start - 
+
+
+// Expression  = UnaryExpr | BinaryExpr | TernaryExpr .
+// BinaryExpr  = Expression binary_op Expression .
+// TernaryExpr = QuestionTernaryExpr | IfTernaryExpr | WhenTernaryExpr .
+    _expression: $ => choice($.unary_expr, $.binary_expr, $.ternary_expr),
+    binary_expr: $ => seq($._expression, $.binary_op, $._expression),
+    ternary_expr: $ => choice($.question_ternary_expr, $.if_ternary_expr, $.when_ternary_expr),
+
+// QuestionTernaryExpr = Condition "?" Expression ":" Expression .
+// IfTernaryExpr       = Expression "if" Condition "else" Expression .
+// WhenTernaryExpr     = Expression "when" Condition "else" Expression .
+
+    question_ternary_expr: $ => seq($.condition, '?', $._expression, ':', $._expression),
+    if_ternary_expr: $ => seq($._expression, 'if', $.condition, 'else', $._expression),
+    when_ternary_expr: $ => seq($._expression, 'when', $.condition, 'else', $._expression),
+
+    // TODO(lucypero): just want callexpr to work for now
+    _unary_expr: $ => alias($.call_expr, $.unary_expr),
+
+// CallExpr = AtomExpr Arguments | "(" CallExpr ")" .
+
+
+// UnaryExpr =
+// 	AtomExpr |
+// 	unary_op UnaryExpr |
+// 	inline_op CallExpr |
+// 	CastExpr UnaryExpr .
+
+
+    // _expression: $ => prec(20,choice(
+    //   $.call_expression,
+    //   $._number,
+    //   $.identifier,
+    //   $.rune_literal,
+    //   $.string_literal,
+    // )),
+
+    // escape_sequence: $ => token.immediate(seq(
+    //   '\\',
+    //   choice(
+    //     /[^xuU]/,
+    //     /\d{2,3}/,
+    //     /x[0-9a-fA-F]{2,}/,
+    //     /u[0-9a-fA-F]{4}/,
+    //     /U[0-9a-fA-F]{8}/
+    //   )
+    // )),
+
+    // call_expression: $ => seq(
+    //   optional(seq($._package_identifier,'.')),
+    //   field('function', $.identifier),
+    //   field('arguments', $.argument_list)
+    // ),
+
+    // argument_list: $ => seq(
+    //   '(',
+    //     optional(seq(
+    //       choice($._expression),
+    //       repeat(seq(',', choice($._expression))),
+    //       optional(',')
+    //     )),
+    //     ')'
+    // ),
+
+    // old.. replace - /end - 
+
+// ArgumentElement = (".." identifier) | ( identifier [ "=" [".."] Expression ] ) .
+// ArgumentElementList = ArgumentElement { "," ArgumentElement } .
+// Arguments = "(" [ ArgumentElementList [ "," ] ] ")" .
+// TypeConversion = Type "(" Expression [ "," ] ")" .
+    argument_element: $ => choice(seq('..', $.identifier), seq($.identifier, optional(seq('=', optional('..'), $._expression)))),
+    argument_element_list: $ => seq($.argument_element, repeat(seq(','), $.argument_element)),
+    arguments: $ => seq('(', optional(seq($.argument_element_list, optional(','))), ')'),
+    type_conversion: $ => seq($.type, '(', $._expression, optional(','), ')'),
 
     // ----------- Number -----------
     // https://odin-lang.org/ref/spec/#integer-literals
@@ -361,6 +400,16 @@ module.exports = grammar({
 
     binary_op: $ => choice('||', '&&', $.rel_op, $.add_op, $.mul_op, $.contain_op),
 
+// unary_op = "+" | "-" | "!" | "&" | "~" | "auto_cast" .
+    unary_op: $ => choice('+', '-', '!', '&', '~', 'auto_cast'),
+
+// inline_op = "inline" | "no_inline" .
+    inline_op: $ => choice('inline', 'no_inline'),
+
+// CastExpr = ("cast" | "transmute") "(" Type ")" .
+    cast_expr: $ => seq(choice('cast', 'transmute'), '(', $.type, ')'),
+
+
     // ----------- Types -----------
 
 // Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
@@ -377,7 +426,22 @@ module.exports = grammar({
 // HelperType = "#" "type" Type .
 // TypeOrWithSpecialization = Type | ( ("typeid" | PolymorphicName) "/" TypeOrWithSpecialization )
 
-    _array_length: $ => alias($._expression, $.array_length),
+// ArrayLength         = Expression .
+// EnumeratedArrayType = Type .
+// ElementType         = Type .
+// ArrayType           = [ "#" "partial" ] "[" ( ArrayLength | EnumeratedArrayType ) "]" ElementType .
+// SliceType           = "[" "]" Type .
+// DynamicArrayType    = "[" "dynamic" "]" Type .
+// MapType             = "map" "[" Type "]" Type .
+// PointerType         = "^" Type .
+// BitSetKeyType       = Type | ( Expression range_op Expression ) .
+// BitSetType          = "bit_set" "[" BitSetKeyType [ ";" Type ] "]" .
+// OpaqueType          = "opaque" Type .
+// SimdVectorType      = "#" "simd" ArrayType .
+// RelativePointerType = "#" "relative" "(" Type [ "," ] ")" PointerType .
+// RelativeSliceType   = "#" "relative" "(" Type [ "," ] ")" SliceType .
+
+    _array_length: $ => prec(20,alias($._expression, $.array_length)),
     _enumerated_array_type: $ => alias($.type, $.enumerated_array_type),
     _element_type: $ => alias($.type, $.element_type),
     array_type: $ => seq(optional('#partial'), '[' , choice($._array_length, $._enumerated_array_type), ']', $._element_type),
@@ -389,20 +453,21 @@ module.exports = grammar({
     bitset_key_type: $ => choice($.type, seq($._expression, $.range_op, $._expression)),
     bitset_type: $ => seq('bit_set', '[', $.bitset_key_type, optional(seq(';', $.type)), ']'),
     opaque_type: $ => seq('opaque', $.type),
-    simd_vector_type: $ => choice($.array_type, seq('#', 'simd', $.array_type)),
+    simd_vector_type: $ => seq('#', 'simd', $.array_type),
     relative_pointer_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.pointer_type),
     relative_slice_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.slice_type),
-
 
     // NOTE(lucypero): struct type
 
     //identifier list (put this somewhere else)
 // IdentifierList = identifier { "," identifier } .
-    identifier_list: $ => seq($.identifier, repeat(seq(',', $.identifier))),
+
+    identifier_list: $ => prec.left(seq($.identifier, repeat(seq(',', $.identifier)))),
+
 
 //expression list (put this somewhere else)
 // ExpressionList = Expression { "," Expression } .
-    expression_list: $ => seq($._expression, repeat(seq(',', $._expression))),
+    expression_list: $ => prec.right(seq($._expression, repeat(seq(',', $._expression)))),
 
 
 // WhereClause = "where" ExpressionList .
@@ -416,7 +481,7 @@ module.exports = grammar({
 // PolymorphicNameList = PolymorphicName { "," PolymorphicName } .
 
     polymorphic_name : $ => seq('$', $.identifier),
-    polymorphic_name_list : $ => seq($.polymorphic_name, repeat(seq(',', $.polymorphic_name))),
+    polymorphic_name_list : $ => prec.right(20,seq($.polymorphic_name, repeat(seq(',', $.polymorphic_name)))),
 
 // TypeOrWithSpecialization = Type | ( ("typeid" | PolymorphicName) "/" TypeOrWithSpecialization ) .
     type_or_with_specialization : $ => choice($.type, seq(choice('typeid', $.polymorphic_name), '/', $.type_or_with_specialization)),
@@ -434,13 +499,13 @@ module.exports = grammar({
 //     StructType = "struct" [PolymorphicParameterList] [StructTypeTags] [WhereClause] "{" StructFieldList [ "," ] "}" .
 //     UnionType  = "union"  [PolymorphicParameterList] [UnionTypeTags] [WhereClause]  "{" ExpressionList  [ "," ] "}" .
 //     EnumType   = "enum" [ Type ] "{" ElementList [ "," ] "}" .
-    struct_type_tags : $ => optional(choice(seq('#', 'align', $._expression), seq('#', 'packed'), seq('#', 'raw_union'))),
-    union_type_tags : $ => optional(choice(seq('#', 'align', $._expression), seq('#', 'no_nil'), seq('#', 'maybe'))),
-    bitfield_tags : $ => optional(seq('#', 'align', $._expression)),
+    struct_type_tags : $ => choice(seq('#', 'align', $._expression), seq('#', 'packed'), seq('#', 'raw_union')),
+    union_type_tags : $ => choice(seq('#', 'align', $._expression), seq('#', 'no_nil'), seq('#', 'maybe')),
+    bitfield_tags : $ => seq('#', 'align', $._expression),
     struct_field_decl : $ => seq(optional('using'), $.identifier_list, ':', $.type),
-    struct_field_list : $ => seq($.struct_field_decl, repeat(seq(',', $.struct_field_decl))),
+    struct_field_list : $ => prec.right(seq($.struct_field_decl, repeat(seq(',', $.struct_field_decl)))),
     element : $ => seq($.identifier, optional(seq('=', $._expression))),
-    element_list : $ => seq($.element, repeat(seq(',', $.element))),
+    element_list : $ => prec.right(seq($.element, repeat(seq(',', $.element)))),
     struct_type : $ => seq('struct', optional($.polymorphic_parameter_list),
                                      optional($.struct_type_tags),
                                      optional($.where_clause),
@@ -458,9 +523,9 @@ module.exports = grammar({
 // BitFieldType = "bit_field" (BitFieldTags) "{" BitFieldFields "}" .
 
     bitfield_field : $ => seq($.identifier_list, ':', $._expression),
-    bitfield_field_list : $ => seq($.bitfield_field, repeat(seq(',', $.bitfield_field))),
-    bitfield_fields : $ => optional(seq($.bitfield_field_list, optional(','))),
-    bitfield_type : $ => seq('bit_field', $.bitfield_tags, '{', $.bitfield_fields, '}'),
+    bitfield_field_list : $ => prec.right(seq($.bitfield_field, repeat(seq(',', $.bitfield_field)))),
+    bitfield_fields : $ => seq($.bitfield_field_list, optional(',')),
+    bitfield_type : $ => seq('bit_field', optional($.bitfield_tags), '{', optional($.bitfield_fields), '}'),
 
 // ProcedureTags = "#" "optional_ok" .
 // ProcedureType = "proc" Signature .
@@ -470,7 +535,7 @@ module.exports = grammar({
     procedure_type : $ => seq('proc', $.signature),
 
     // NOTE(lucypero): this might be wrong
-    signature : $ => choice($.parameters, optional(seq('->', $.result)), optional($.procedure_tags)),
+    signature : $ => prec.right(seq($.parameters, optional(seq('->', $.result)), optional($.procedure_tags))),
 
 // Result = PlainParameters | Type .
 
@@ -482,27 +547,30 @@ module.exports = grammar({
 // ParameterDecl = [ [ParameterPrefixes]  (IdentifierList | PolymorphicNameList) [ [":"] ".." TypeOrWithSpecialization ] ] .
 
     parameters : $ => seq('(', optional(seq($.parameter_list, optional(','))), ')'),
-    parameter_list : $ => seq($.parameter_decl, repeat(seq(',', $.parameter_decl))),
+    parameter_list : $ => prec.right(seq($.parameter_decl, repeat(seq(',', $.parameter_decl)))),
     parameter_prefixes : $ => choice('using', seq('#', 'no_alias'), seq('#', 'c_vararg'), 'auto_cast', seq('#', 'const')),
-    parameter_decl : $ => optional(seq(optional($.parameter_prefixes), choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization)))),
+    parameter_decl : $ => seq(optional($.parameter_prefixes), choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization))),
 
 // PlainParameters = "(" [ PlainParameterList [","] ] ")" .
 // PlainParameterList = PlainParameterDecl { "," PlainParameterDecl } .
 // PlainParameterDecl = [ (IdentifierList | PolymorphicNameList) [ [":"] ".." TypeOrWithSpecialization ] ] .
 
     plain_parameters : $ => seq('(', optional(seq($.plain_parameter_list, optional(','))), ')'),
-    plain_parameter_list : $ => seq($.plain_parameter_decl, repeat(seq(',', $.plain_parameter_decl))),
-    plain_parameter_decl : $ => optional(seq(choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization)))),
+    plain_parameter_list : $ => prec.right(seq($.plain_parameter_decl, repeat(seq(',', $.plain_parameter_decl)))),
+    plain_parameter_decl : $ => seq(choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization))),
 
 
 // HelperType = "#" "type" Type .
     helper_type : $ => seq('#', 'type', $.type),
 
-    // NOTE(lucypero): bill says this is old and will be removed i think
-    _qualified_identifier : $ => alias($.identifier, $.qualified_identifier),
+    // NOTE(lucypero): bill says this is old and will be removed i think  
 
-    type_name: $ => choice($.identifier, $._qualified_identifier),
+// PolymorphicName = "$" identifier .
+// PolymorphicNameList = PolymorphicName { "," PolymorphicName } .
+// Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
+// TypeName = identifier | PolymorphicName .
 
+    type_name: $ => choice($.identifier, $.polymorphic_name),
 
     // TODO(lucypero): 
 
@@ -515,12 +583,13 @@ module.exports = grammar({
 //           SimdVectorType |
 //           RelativePointerType | RelativeSliceType .
 
-    type_literal: $ => choice('typeid', $.array_type, $.slice_type, $.dynamic_array_type,
+    _type_literal: $ => choice('typeid', $.array_type, $.slice_type, $.dynamic_array_type,
       $.map_type, $.struct_type, $.union_type, $.enum_type, $.bitfield_type,
       $.pointer_type, $.procedure_type, $.bitset_type, 
       $.opaque_type, $.simd_vector_type, $.relative_pointer_type, $.relative_slice_type),
 
-    type: $ => choice($.type_name, $.type_literal, seq("(", $.type, ")"), $.helper_type),
+// Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
+    type: $ => choice($.type_name, $._type_literal, seq("(", $.type, ")"), $.helper_type, $._expression),
   }
 });
 
