@@ -146,20 +146,10 @@ floatNoExp = choice(
   rawStringLiteral = seq('`', repeat(choice(unicodeChar, newline)),'`'),
   interpretedStringLiteral = seq('"', repeat(choice(unicodeValue, byteValue)), '"'),
 
-  stringLiteral = choice(rawStringLiteral, interpretedStringLiteral),
+  stringLit = choice(rawStringLiteral, interpretedStringLiteral),
   // stringLiteral = interpretedStringLiteral,
 
   letter = choice(unicodeLetter, '_'),
-
-
-
-
-   
-  
-
-  
-
-
 
 module.exports = grammar({
   name: 'odin',
@@ -181,12 +171,15 @@ module.exports = grammar({
 
 // PackageDecl = "package" PackageName .
 // PackageName = identifier .
-    package_decl: $ => seq('package', $.package_name),
+    package_decl: $ => seq('package', $._package_name),
     _package_name: $ => alias($.identifier, $.package_name),
 
 // TopLevelDecl = ( { Attribute } (ImportDecl | ValueDecl | ForeignBlockDecl | ForeignImportDecl) ) |
 //                 ConstAssertPanic .
-    _top_level_decl: $ => choice(choice(repeat($.attribute), choice($.import_decl, $.value_decl, $.foreign_block_decl, $.foreign_import_decl)), $.const_assert_panic),
+    _top_level_decl: $ => choice(
+      seq(repeat($.attribute), choice($.import_decl, $.value_decl, $.foreign_block_decl, $.foreign_import_decl)),
+      $.const_assert_panic
+    ),
 
 // ConstAssertPanic = "#" ( "assert" | "panic" ) Arguments .
 // ImportDecl = "import" [ PackageName ] ImportPath .
@@ -196,11 +189,11 @@ module.exports = grammar({
 // ForeignImportPathList = ImportPath { "," ImportPath } .
 
     const_assert_panic: $ => seq('#', choice('assert', 'panic'), $.arguments),
-    import_decl: $ => seq('import', optional($.package_name), $.import_path),
+    import_decl: $ => seq('import', optional($._package_name), $._import_path),
     _import_path: $ => alias($.string_lit, $.import_path),
-    foreign_import_decl: $ => seq('foreign', 'import', optional($.package_name), optional($.import_path, $.foreign_import_paths)),
+    foreign_import_decl: $ => seq('foreign', 'import', optional($._package_name), choice($._import_path, $.foreign_import_paths)),
     foreign_import_paths: $ => seq('{', optional(seq($.foreign_import_path_list, optional(','))), '}'),
-    foreign_import_path_list: $ => seq($._import_path, repeat(seq(',', $._import_path))),
+    foreign_import_path_list: $ => prec.right(seq($._import_path, repeat(seq(',', $._import_path)))),
 
 // ForeignBlockDecl = "foreign" [ identifier ] "{" { { Attribute } ValueDecl } "}" .
     foreign_block_decl: $ => seq('foreign', optional($.identifier), '{', repeat(seq(repeat($.attribute), $.value_decl)), '}'),
@@ -222,13 +215,11 @@ module.exports = grammar({
 // ProcedureBody = Block .
     procedure_lit_tags: $ => seq('#', choice('bounds_check', 'no_bounds_check')),
     procedure_lit: $ => seq('proc', $.signature, optional($.procedure_lit_tags), $.procedure_body),
-    _procedure_body: $ => alias($.block, $.procedure_body),
+    procedure_body: $ => alias($.block, $.procedure_body),
 
 // Block = "{" StatementList "}" .
-    block: $ => seq('{', $.statement_list, '}'),
+    block: $ => seq('{', repeat(seq($.statement, ';')), '}'),
 // StatementList = { Statement ";" } .
-    statement_list: $ => repeat(seq($.statement, ';')),
-
 
 // Statement =
 // 	LabeledStmt | SimpleStmt | ReturnStmt | BreakStmt | ContinueStmt | FallthroughStmt |
@@ -253,7 +244,7 @@ module.exports = grammar({
 
     assign_op : $ => seq(optional(choice($.add_op, $.mul_op)), '='),
 
-    _expression_stmt : $ => alias($.expression, $.expression_stmt),
+    _expression_stmt : $ => alias($._expression, $.expression_stmt),
     assignment : $ => seq($.expression_list, $.assign_op, $.expression_list),
 
 // ProcedureGroup = "proc" "{" ExpressionList [ "," ]  "}" .
@@ -262,47 +253,51 @@ module.exports = grammar({
 // ConstExpression = Expression | ProcedureGroup | "distinct" Type | "(" ConstExpression ")" .
 // ConstExpressionList = ConstExpression { "," ConstExpression } .
     const_expression : $ => choice($._expression, $.procedure_group, seq('distinct', $.type), seq('(', $.const_expression, ')')),
-    const_expression_list : $ => seq($.const_expression, repeat(seq(','), $.const_expression)),
+    const_expression_list : $ => seq($.const_expression, repeat(seq(',', $.const_expression))),
 
 // ConstDecl = IdentifierList ":" [ Type ] ":" ConstExpressionList .
 // VarDecl   = IdentifierList ":" [ Type ] [ "=" ExpressionList ].
 // ValueDecl    = ConstDecl | VarDecl .
 
     const_decl : $ => seq($.identifier_list, ':', optional($.type), ':', $.const_expression_list),
-    var_decl : $ => seq($.identifier_list, ':', optional($.type), optional(seq('=', $.expression_list))),
+    var_decl : $ => prec.right(seq($.identifier_list, ':', optional($.type), optional(seq('=', $.expression_list)))),
     value_decl : $ => choice($.const_decl, $.var_decl),
 
     simple_stmt: $ => choice($._expression_stmt, $.assignment, $.value_decl),
 
 // Attribute = "@" identifier | "@" Arguments .
-    attribute: $ => optional(seq('@', $.identifier), seq('@', $.arguments)),
+    attribute: $ => choice(seq('@', $.identifier), seq('@', $.arguments)),
 
     // DeclStmt = { Attribute } ValueDecl .
     decl_stmt: $ => seq(repeat($.attribute), $.value_decl),
-
-    // old.. replace - start - 
-
 
 // Expression  = UnaryExpr | BinaryExpr | TernaryExpr .
 // BinaryExpr  = Expression binary_op Expression .
 // TernaryExpr = QuestionTernaryExpr | IfTernaryExpr | WhenTernaryExpr .
     _expression: $ => choice($.unary_expr, $.binary_expr, $.ternary_expr),
-    binary_expr: $ => seq($._expression, $.binary_op, $._expression),
+    binary_expr: $ => prec.right(20,seq($._expression, $.binary_op, $._expression)),
     ternary_expr: $ => choice($.question_ternary_expr, $.if_ternary_expr, $.when_ternary_expr),
 
 // QuestionTernaryExpr = Condition "?" Expression ":" Expression .
 // IfTernaryExpr       = Expression "if" Condition "else" Expression .
 // WhenTernaryExpr     = Expression "when" Condition "else" Expression .
 
-    question_ternary_expr: $ => seq($.condition, '?', $._expression, ':', $._expression),
-    if_ternary_expr: $ => seq($._expression, 'if', $.condition, 'else', $._expression),
-    when_ternary_expr: $ => seq($._expression, 'when', $.condition, 'else', $._expression),
+    question_ternary_expr: $ => prec.right(20,seq($.condition, '?', $._expression, ':', $._expression)),
+    if_ternary_expr: $ => prec.right(20,seq($._expression, 'if', $.condition, 'else', $._expression)),
+    when_ternary_expr: $ => prec.right(20,seq($._expression, 'when', $.condition, 'else', $._expression)),
+
+    condition : $ => alias($._expression, $.condition),
 
     // TODO(lucypero): just want callexpr to work for now
-    _unary_expr: $ => alias($.call_expr, $.unary_expr),
+    unary_expr: $ => alias($.call_expr, $.unary_expr),
 
 // CallExpr = AtomExpr Arguments | "(" CallExpr ")" .
 
+    
+    // TODO(lucypero): incomplete
+    atom_expr: $ => alias($.call_expr, $.atom_expr),
+
+    call_expr: $ => prec(20,choice(seq($.atom_expr, $.arguments), seq('(', $.call_expr, ')'))),
 
 // UnaryExpr =
 // 	AtomExpr |
@@ -353,7 +348,7 @@ module.exports = grammar({
 // Arguments = "(" [ ArgumentElementList [ "," ] ] ")" .
 // TypeConversion = Type "(" Expression [ "," ] ")" .
     argument_element: $ => choice(seq('..', $.identifier), seq($.identifier, optional(seq('=', optional('..'), $._expression)))),
-    argument_element_list: $ => seq($.argument_element, repeat(seq(','), $.argument_element)),
+    argument_element_list: $ => prec.right(seq($.argument_element, repeat(seq(',', $.argument_element)))),
     arguments: $ => seq('(', optional(seq($.argument_element_list, optional(','))), ')'),
     type_conversion: $ => seq($.type, '(', $._expression, optional(','), ')'),
 
@@ -371,8 +366,8 @@ module.exports = grammar({
       $.imaginary_literal,
     ),
 
-    rune_literal: $ => token(runeLiteral),
-    string_literal: $ => token(stringLiteral),
+    rune_lit: $ => token(runeLiteral),
+    string_lit: $ => token(stringLit),
 
     comment: $ => choice(
       $.line_comment,
@@ -462,7 +457,7 @@ module.exports = grammar({
     //identifier list (put this somewhere else)
 // IdentifierList = identifier { "," identifier } .
 
-    identifier_list: $ => prec.left(seq($.identifier, repeat(seq(',', $.identifier)))),
+    identifier_list: $ => prec.right(20,seq($.identifier, repeat(seq(',', $.identifier)))),
 
 
 //expression list (put this somewhere else)
