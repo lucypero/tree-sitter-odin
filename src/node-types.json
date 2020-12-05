@@ -13,7 +13,31 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
           "named": true
         },
         {
@@ -21,11 +45,47 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -66,11 +126,63 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -78,7 +190,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -102,6 +222,21 @@
         },
         {
           "type": "enumerated_array_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "arrow_selector",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -146,29 +281,6 @@
     }
   },
   {
-    "type": "atom_expr",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "arguments",
-          "named": true
-        },
-        {
-          "type": "atom_expr",
-          "named": true
-        },
-        {
-          "type": "call_expr",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "attribute",
     "named": true,
     "fields": {},
@@ -188,6 +300,42 @@
     }
   },
   {
+    "type": "auto_type_assertion",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "basic_lit",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "float_lit",
+          "named": true
+        },
+        {
+          "type": "imaginary_lit",
+          "named": true
+        },
+        {
+          "type": "int_lit",
+          "named": true
+        },
+        {
+          "type": "rune_lit",
+          "named": true
+        },
+        {
+          "type": "string_lit",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "binary_expr",
     "named": true,
     "fields": {},
@@ -195,6 +343,18 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
         {
           "type": "binary_expr",
           "named": true
@@ -204,11 +364,59 @@
           "named": true
         },
         {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -250,7 +458,31 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
           "named": true
         },
         {
@@ -258,11 +490,47 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -303,11 +571,63 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -315,7 +635,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -349,11 +677,63 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
           "named": true
         },
         {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
           "type": "range_op",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -365,7 +745,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -403,11 +791,90 @@
           "named": true
         },
         {
-          "type": "atom_expr",
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
           "named": true
         },
         {
           "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
+          "type": "ternary_expr",
+          "named": true
+        },
+        {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "cast_expr",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
           "named": true
         }
       ]
@@ -418,11 +885,31 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
           "named": true
         },
         {
@@ -430,11 +917,51 @@
           "named": true
         },
         {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -483,11 +1010,31 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
           "named": true
         },
         {
@@ -495,7 +1042,39 @@
           "named": true
         },
         {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
           "type": "procedure_group",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -507,7 +1086,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -546,11 +1133,20 @@
           "named": true
         },
         {
-          "type": "value_decl",
+          "type": "const_decl",
+          "named": true
+        },
+        {
+          "type": "var_decl",
           "named": true
         }
       ]
     }
+  },
+  {
+    "type": "dereference",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "dynamic_array_type",
@@ -576,7 +1172,31 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
           "named": true
         },
         {
@@ -584,11 +1204,47 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -614,11 +1270,23 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
           "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
           "named": true
         },
         {
@@ -634,6 +1302,18 @@
           "named": true
         },
         {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
           "type": "dynamic_array_type",
           "named": true
         },
@@ -646,6 +1326,18 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
           "type": "map_type",
           "named": true
         },
@@ -654,7 +1346,15 @@
           "named": true
         },
         {
+          "type": "operand_name",
+          "named": true
+        },
+        {
           "type": "pointer_type",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
           "named": true
         },
         {
@@ -670,7 +1370,15 @@
           "named": true
         },
         {
+          "type": "selector",
+          "named": true
+        },
+        {
           "type": "simd_vector_type",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -690,11 +1398,19 @@
           "named": true
         },
         {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
           "type": "type_name",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "unary_op",
           "named": true
         },
         {
@@ -728,11 +1444,23 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
           "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
           "named": true
         },
         {
@@ -748,6 +1476,18 @@
           "named": true
         },
         {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
           "type": "dynamic_array_type",
           "named": true
         },
@@ -760,6 +1500,18 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
           "type": "map_type",
           "named": true
         },
@@ -768,7 +1520,15 @@
           "named": true
         },
         {
+          "type": "operand_name",
+          "named": true
+        },
+        {
           "type": "pointer_type",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
           "named": true
         },
         {
@@ -784,7 +1544,15 @@
           "named": true
         },
         {
+          "type": "selector",
+          "named": true
+        },
+        {
           "type": "simd_vector_type",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -804,11 +1572,19 @@
           "named": true
         },
         {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
           "type": "type_name",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "unary_op",
           "named": true
         },
         {
@@ -827,7 +1603,59 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -835,7 +1663,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -846,11 +1682,63 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -858,7 +1746,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -877,11 +1773,15 @@
           "named": true
         },
         {
+          "type": "const_decl",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
-          "type": "value_decl",
+          "type": "var_decl",
           "named": true
         }
       ]
@@ -979,7 +1879,27 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
           "named": true
         },
         {
@@ -987,11 +1907,66 @@
           "named": true
         },
         {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "implicit_selector_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -1015,6 +1990,94 @@
         }
       ]
     }
+  },
+  {
+    "type": "index",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
+          "type": "ternary_expr",
+          "named": true
+        },
+        {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "inline_op",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "map_type",
@@ -1299,6 +2362,29 @@
     }
   },
   {
+    "type": "procedure_lit",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "procedure_body",
+          "named": true
+        },
+        {
+          "type": "procedure_lit_tags",
+          "named": true
+        },
+        {
+          "type": "signature",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "procedure_lit_tags",
     "named": true,
     "fields": {}
@@ -1332,7 +2418,27 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
           "named": true
         },
         {
@@ -1340,11 +2446,51 @@
           "named": true
         },
         {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -1428,6 +2574,21 @@
     }
   },
   {
+    "type": "selector",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "signature",
     "named": true,
     "fields": {},
@@ -1466,23 +2627,83 @@
     }
   },
   {
-    "type": "simple_stmt",
+    "type": "slice",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
-      "required": true,
+      "multiple": true,
+      "required": false,
       "types": [
         {
-          "type": "assignment",
+          "type": "arrow_selector",
           "named": true
         },
         {
-          "type": "expression_stmt",
+          "type": "auto_type_assertion",
           "named": true
         },
         {
-          "type": "value_decl",
+          "type": "basic_lit",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
+          "type": "ternary_expr",
+          "named": true
+        },
+        {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -1520,6 +2741,10 @@
           "named": true
         },
         {
+          "type": "const_decl",
+          "named": true
+        },
+        {
           "type": "foreign_block_decl",
           "named": true
         },
@@ -1536,7 +2761,7 @@
           "named": true
         },
         {
-          "type": "value_decl",
+          "type": "var_decl",
           "named": true
         }
       ]
@@ -1551,7 +2776,19 @@
       "required": true,
       "types": [
         {
+          "type": "assignment",
+          "named": true
+        },
+        {
+          "type": "const_decl",
+          "named": true
+        },
+        {
           "type": "decl_stmt",
+          "named": true
+        },
+        {
+          "type": "expression_stmt",
           "named": true
         },
         {
@@ -1559,7 +2796,7 @@
           "named": true
         },
         {
-          "type": "simple_stmt",
+          "type": "var_decl",
           "named": true
         }
       ]
@@ -1631,11 +2868,63 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -1643,7 +2932,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -1677,11 +2974,23 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
           "type": "array_type",
+          "named": true
+        },
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
           "named": true
         },
         {
@@ -1697,6 +3006,18 @@
           "named": true
         },
         {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
           "type": "dynamic_array_type",
           "named": true
         },
@@ -1709,6 +3030,18 @@
           "named": true
         },
         {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
           "type": "map_type",
           "named": true
         },
@@ -1717,7 +3050,15 @@
           "named": true
         },
         {
+          "type": "operand_name",
+          "named": true
+        },
+        {
           "type": "pointer_type",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
           "named": true
         },
         {
@@ -1733,7 +3074,15 @@
           "named": true
         },
         {
+          "type": "selector",
+          "named": true
+        },
+        {
           "type": "simd_vector_type",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -1753,15 +3102,125 @@
           "named": true
         },
         {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
           "type": "type_name",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "unary_op",
           "named": true
         },
         {
           "type": "union_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_assertion",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "type_conversion",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
+          "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
+          "type": "ternary_expr",
+          "named": true
+        },
+        {
+          "type": "type",
+          "named": true
+        },
+        {
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -1810,31 +3269,9 @@
     }
   },
   {
-    "type": "unary_expr",
+    "type": "unary_op",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "arguments",
-          "named": true
-        },
-        {
-          "type": "atom_expr",
-          "named": true
-        },
-        {
-          "type": "call_expr",
-          "named": true
-        },
-        {
-          "type": "unary_expr",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "union_type",
@@ -1868,11 +3305,63 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
+          "named": true
+        },
+        {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
           "named": true
         },
         {
@@ -1880,26 +3369,15 @@
           "named": true
         },
         {
-          "type": "unary_expr",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "value_decl",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "const_decl",
+          "type": "type_assertion",
           "named": true
         },
         {
-          "type": "var_decl",
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -1937,7 +3415,27 @@
       "required": true,
       "types": [
         {
+          "type": "arrow_selector",
+          "named": true
+        },
+        {
+          "type": "auto_type_assertion",
+          "named": true
+        },
+        {
+          "type": "basic_lit",
+          "named": true
+        },
+        {
           "type": "binary_expr",
+          "named": true
+        },
+        {
+          "type": "call_expr",
+          "named": true
+        },
+        {
+          "type": "cast_expr",
           "named": true
         },
         {
@@ -1945,11 +3443,51 @@
           "named": true
         },
         {
+          "type": "dereference",
+          "named": true
+        },
+        {
+          "type": "implicit_selector_expression",
+          "named": true
+        },
+        {
+          "type": "index",
+          "named": true
+        },
+        {
+          "type": "inline_op",
+          "named": true
+        },
+        {
+          "type": "operand_name",
+          "named": true
+        },
+        {
+          "type": "procedure_lit",
+          "named": true
+        },
+        {
+          "type": "selector",
+          "named": true
+        },
+        {
+          "type": "slice",
+          "named": true
+        },
+        {
           "type": "ternary_expr",
           "named": true
         },
         {
-          "type": "unary_expr",
+          "type": "type_assertion",
+          "named": true
+        },
+        {
+          "type": "type_conversion",
+          "named": true
+        },
+        {
+          "type": "unary_op",
           "named": true
         }
       ]
@@ -2036,6 +3574,10 @@
   },
   {
     "type": "->",
+    "named": false
+  },
+  {
+    "type": ".",
     "named": false
   },
   {
@@ -2171,7 +3713,7 @@
     "named": false
   },
   {
-    "type": "float_literal",
+    "type": "float_lit",
     "named": true
   },
   {
@@ -2187,7 +3729,7 @@
     "named": false
   },
   {
-    "type": "imaginary_literal",
+    "type": "imaginary_lit",
     "named": true
   },
   {
@@ -2207,7 +3749,7 @@
     "named": false
   },
   {
-    "type": "int_literal",
+    "type": "int_lit",
     "named": true
   },
   {
@@ -2245,6 +3787,10 @@
   {
     "type": "opaque",
     "named": false
+  },
+  {
+    "type": "operand_name",
+    "named": true
   },
   {
     "type": "optional_ok",
@@ -2291,8 +3837,16 @@
     "named": false
   },
   {
+    "type": "rune_lit",
+    "named": true
+  },
+  {
     "type": "simd",
     "named": false
+  },
+  {
+    "type": "string_lit",
+    "named": true
   },
   {
     "type": "struct",

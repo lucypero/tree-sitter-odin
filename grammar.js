@@ -177,7 +177,7 @@ module.exports = grammar({
 // TopLevelDecl = ( { Attribute } (ImportDecl | ValueDecl | ForeignBlockDecl | ForeignImportDecl) ) |
 //                 ConstAssertPanic .
     _top_level_decl: $ => choice(
-      seq(repeat($.attribute), choice($.import_decl, $.value_decl, $.foreign_block_decl, $.foreign_import_decl)),
+      seq(repeat($.attribute), choice($.import_decl, $._value_decl, $.foreign_block_decl, $.foreign_import_decl)),
       $.const_assert_panic
     ),
 
@@ -196,7 +196,7 @@ module.exports = grammar({
     foreign_import_path_list: $ => prec.right(seq($._import_path, repeat(seq(',', $._import_path)))),
 
 // ForeignBlockDecl = "foreign" [ identifier ] "{" { { Attribute } ValueDecl } "}" .
-    foreign_block_decl: $ => seq('foreign', optional($.identifier), '{', repeat(seq(repeat($.attribute), $.value_decl)), '}'),
+    foreign_block_decl: $ => seq('foreign', optional($.identifier), '{', repeat(seq(repeat($.attribute), $._value_decl)), '}'),
 
     identifier: $ => token(seq( letter, repeat(choice(letter, unicodeDigit)))),
 
@@ -209,6 +209,28 @@ module.exports = grammar({
 
     // ----------- Expressions -----------
 
+
+
+    // TODO(lucypero): just doing enough for procedure literals to be parsed
+// Operand =
+// 	Literal |
+// 	OperandName |
+// 	"(" Expression ")" |
+// 	TagExpr |
+// 	InlineAsmExpr |
+// 	ImplicitSelectorExpression .
+    _operand: $ => prec(20,choice($._literal, $._operand_name, seq('(', $._expression, ')'),
+                           $.implicit_selector_expression)),
+
+    _operand_name: $ => prec(30,alias($.identifier, $.operand_name)),
+
+    implicit_selector_expression: $ => seq('.', $.identifier),
+
+// Literal = BasicLit | CompoundLit | ProcedureLit .
+    _literal: $ => choice($.basic_lit, $.procedure_lit),
+
+// BasicLit = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
+    basic_lit: $ => choice($.int_lit, $.float_lit, $.imaginary_lit, $.rune_lit, $.string_lit),
 
 // ProcedureLitTags = "#" ("bounds_check" | "no_bounds_check") .
 // ProcedureLit = "proc" Signature [ProcedureLitTags] ProcedureBody .
@@ -232,7 +254,7 @@ module.exports = grammar({
     return_stmt: $ => seq('return', $.expression_list),
 
     // TODO(lucypero): do the others later... only simpleStatement for now
-    statement: $ => choice($.simple_stmt, $.decl_stmt, $.return_stmt),
+    statement: $ => choice($._simple_stmt, $.decl_stmt, $.return_stmt),
 
 // NOTE(lucypero): can't have this.. this matches the empty string..
 // EmptyStmt = .
@@ -256,25 +278,23 @@ module.exports = grammar({
     const_expression_list : $ => seq($.const_expression, repeat(seq(',', $.const_expression))),
 
 // ConstDecl = IdentifierList ":" [ Type ] ":" ConstExpressionList .
-// VarDecl   = IdentifierList ":" [ Type ] [ "=" ExpressionList ].
-// ValueDecl    = ConstDecl | VarDecl .
-
+// VarDecl = IdentifierList ":" (Type | [Type] "=" ExpressionList)
     const_decl : $ => seq($.identifier_list, ':', optional($.type), ':', $.const_expression_list),
-    var_decl : $ => prec.right(seq($.identifier_list, ':', optional($.type), optional(seq('=', $.expression_list)))),
-    value_decl : $ => choice($.const_decl, $.var_decl),
+    var_decl : $ => prec.right(seq($.identifier_list, ':', choice($.type, seq(optional($.type), '=', $.expression_list)))),
+    _value_decl : $ => choice($.const_decl, $.var_decl),
 
-    simple_stmt: $ => choice($._expression_stmt, $.assignment, $.value_decl),
+    _simple_stmt: $ => choice($._expression_stmt, $.assignment, $._value_decl),
 
 // Attribute = "@" identifier | "@" Arguments .
     attribute: $ => choice(seq('@', $.identifier), seq('@', $.arguments)),
 
     // DeclStmt = { Attribute } ValueDecl .
-    decl_stmt: $ => seq(repeat($.attribute), $.value_decl),
+    decl_stmt: $ => prec(20,seq(repeat($.attribute), $._value_decl)),
 
 // Expression  = UnaryExpr | BinaryExpr | TernaryExpr .
 // BinaryExpr  = Expression binary_op Expression .
 // TernaryExpr = QuestionTernaryExpr | IfTernaryExpr | WhenTernaryExpr .
-    _expression: $ => choice($.unary_expr, $.binary_expr, $.ternary_expr),
+    _expression: $ => choice($._unary_expr, $.binary_expr, $.ternary_expr),
     binary_expr: $ => prec.right(20,seq($._expression, $.binary_op, $._expression)),
     ternary_expr: $ => choice($.question_ternary_expr, $.if_ternary_expr, $.when_ternary_expr),
 
@@ -288,16 +308,57 @@ module.exports = grammar({
 
     condition : $ => alias($._expression, $.condition),
 
+// UnaryExpr =
+// 	AtomExpr |
+// 	unary_op UnaryExpr |
+// 	inline_op CallExpr |
+// 	CastExpr UnaryExpr .
     // TODO(lucypero): just want callexpr to work for now
-    unary_expr: $ => alias($.call_expr, $.unary_expr),
+    _unary_expr: $ => prec(20,choice($._atom_expr, seq($.unary_op, $._unary_expr), seq($.inline_op, $.call_expr),
+                      seq($.cast_expr, $._unary_expr))),
 
 // CallExpr = AtomExpr Arguments | "(" CallExpr ")" .
 
     
-    // TODO(lucypero): incomplete
-    atom_expr: $ => alias($.call_expr, $.atom_expr),
+// AtomExpr =
+// 	Operand |
+// 	TypeConversion |
+// 	AtomExpr Selector |
+// 	AtomExpr ArrowSelector |
+// 	AtomExpr Index |
+// 	AtomExpr Slice |
+// 	AtomExpr TypeAssertion |
+// 	AtomExpr AutoTypeAssertion |
+// 	CallExpr |
+// 	AtomExpr Dereference .
 
-    call_expr: $ => prec(20,choice(seq($.atom_expr, $.arguments), seq('(', $.call_expr, ')'))),
+    // TODO(lucypero): incomplete
+    _atom_expr: $ => choice($._operand, $.type_conversion, seq($._atom_expr, $.selector),
+          seq($._atom_expr, $.arrow_selector), seq($._atom_expr, $.index), seq($._atom_expr, $.slice),
+          seq($._atom_expr, $.type_assertion), seq($._atom_expr, $.auto_type_assertion), $.call_expr,
+          seq($._atom_expr, $.dereference)),
+
+
+// Dereference = "^" .
+
+// Selector      = "." identifier .
+// ArrowSelector = "->" identifier .
+// Index         = "[" Expression "]" .
+// Slice         = "[" [ Expression ] ":" [ Expression ] "]" .
+// TypeAssertion = "." "(" Type ")" .
+// AutoTypeAssertion = "." "?" .
+
+    selector: $ => seq('.', $.identifier),
+    arrow_selector: $ => seq('->', $.identifier),
+    index: $ => seq('[', $._expression, ']'),
+    slice: $ => seq('[', optional($._expression), ':', optional($._expression), ']'),
+    type_assertion: $ => seq('.', '(', $.type, ')'),
+    auto_type_assertion: $ => seq('.', '?'),
+
+
+// Dereference = "^" .
+    dereference: $ => '^',
+    call_expr: $ => prec(30,choice(seq($._atom_expr, $.arguments), seq('(', $.call_expr, ')'))),
 
 // UnaryExpr =
 // 	AtomExpr |
@@ -343,11 +404,13 @@ module.exports = grammar({
 
     // old.. replace - /end - 
 
+
+    // NOTE(lucypero): the ebnf is wrong.. it should accept any expression.. not just identifiers
 // ArgumentElement = (".." identifier) | ( identifier [ "=" [".."] Expression ] ) .
 // ArgumentElementList = ArgumentElement { "," ArgumentElement } .
 // Arguments = "(" [ ArgumentElementList [ "," ] ] ")" .
 // TypeConversion = Type "(" Expression [ "," ] ")" .
-    argument_element: $ => choice(seq('..', $.identifier), seq($.identifier, optional(seq('=', optional('..'), $._expression)))),
+    argument_element: $ => choice(seq('..', $.identifier), seq($.identifier, optional(seq('=', optional('..'), $._expression))), $._expression),
     argument_element_list: $ => prec.right(seq($.argument_element, repeat(seq(',', $.argument_element)))),
     arguments: $ => seq('(', optional(seq($.argument_element_list, optional(','))), ')'),
     type_conversion: $ => seq($.type, '(', $._expression, optional(','), ')'),
@@ -356,14 +419,14 @@ module.exports = grammar({
     // https://odin-lang.org/ref/spec/#integer-literals
     // https://odin-lang.org/docs/overview/#numbers
 
-    int_literal: $ => token(intLiteral),
-    float_literal: $=> token(floatLiteral),
-    imaginary_literal: $=> token(imaginaryLiteral),
+    int_lit: $ => token(intLiteral),
+    float_lit: $=> token(floatLiteral),
+    imaginary_lit: $=> token(imaginaryLiteral),
 
     _number: $ => choice(
-      $.float_literal,
-      $.int_literal,
-      $.imaginary_literal,
+      $.float_lit,
+      $.int_lit,
+      $.imaginary_lit,
     ),
 
     rune_lit: $ => token(runeLiteral),
@@ -438,16 +501,16 @@ module.exports = grammar({
 
     _array_length: $ => prec(20,alias($._expression, $.array_length)),
     _enumerated_array_type: $ => alias($.type, $.enumerated_array_type),
-    _element_type: $ => alias($.type, $.element_type),
+    _element_type: $ => prec.left(alias($.type, $.element_type)),
     array_type: $ => seq(optional('#partial'), '[' , choice($._array_length, $._enumerated_array_type), ']', $._element_type),
 
-    slice_type: $ => seq('[]', $.type),
-    dynamic_array_type: $ => seq('[dynamic]', $.type),
-    map_type: $ => seq('map', '[', $.type, ']', $.type),
-    pointer_type: $ => seq('^', $.type),
+    slice_type: $ => prec.right(seq('[]', $.type)),
+    dynamic_array_type: $ => prec.right(seq('[dynamic]', $.type)),
+    map_type: $ => prec.right(seq('map', '[', $.type, ']', $.type)),
+    pointer_type: $ => prec.right(seq('^', $.type)),
     bitset_key_type: $ => choice($.type, seq($._expression, $.range_op, $._expression)),
     bitset_type: $ => seq('bit_set', '[', $.bitset_key_type, optional(seq(';', $.type)), ']'),
-    opaque_type: $ => seq('opaque', $.type),
+    opaque_type: $ => prec.right(seq('opaque', $.type)),
     simd_vector_type: $ => seq('#', 'simd', $.array_type),
     relative_pointer_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.pointer_type),
     relative_slice_type: $ => seq('#', 'relative', '(', $.type, optional(','), ')', $.slice_type),
@@ -476,7 +539,7 @@ module.exports = grammar({
 // PolymorphicNameList = PolymorphicName { "," PolymorphicName } .
 
     polymorphic_name : $ => seq('$', $.identifier),
-    polymorphic_name_list : $ => prec.right(20,seq($.polymorphic_name, repeat(seq(',', $.polymorphic_name)))),
+    polymorphic_name_list : $ => prec.right(30,seq($.polymorphic_name, repeat(seq(',', $.polymorphic_name)))),
 
 // TypeOrWithSpecialization = Type | ( ("typeid" | PolymorphicName) "/" TypeOrWithSpecialization ) .
     type_or_with_specialization : $ => choice($.type, seq(choice('typeid', $.polymorphic_name), '/', $.type_or_with_specialization)),
@@ -527,14 +590,14 @@ module.exports = grammar({
     // NOTE(lucypero): what is this.. i think this is not written well
 // Signature = Parameters | [ "->" Result ] [ ProcedureTags ] .
     procedure_tags : $ => seq('#', 'optional_ok'),
-    procedure_type : $ => seq('proc', $.signature),
+    procedure_type : $ => prec.left(seq('proc', $.signature)),
 
     // NOTE(lucypero): this might be wrong
     signature : $ => prec.right(seq($.parameters, optional(seq('->', $.result)), optional($.procedure_tags))),
 
 // Result = PlainParameters | Type .
 
-    result : $ => choice($.plain_parameters, $.type),
+    result : $ => prec(20,choice($.plain_parameters, $.type)),
 
 // Parameters = "(" [ ParameterList [","] ] ")" .
 // ParameterList = ParameterDecl { "," ParameterDecl } .
@@ -556,7 +619,7 @@ module.exports = grammar({
 
 
 // HelperType = "#" "type" Type .
-    helper_type : $ => seq('#', 'type', $.type),
+    helper_type : $ => prec.right(seq('#', 'type', $.type)),
 
     // NOTE(lucypero): bill says this is old and will be removed i think  
 
@@ -565,7 +628,7 @@ module.exports = grammar({
 // Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
 // TypeName = identifier | PolymorphicName .
 
-    type_name: $ => choice($.identifier, $.polymorphic_name),
+    type_name: $ => prec(20,choice($.identifier, $.polymorphic_name)),
 
     // TODO(lucypero): 
 
