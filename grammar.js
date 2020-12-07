@@ -219,7 +219,7 @@ module.exports = grammar({
 // 	TagExpr |
 // 	InlineAsmExpr |
 // 	ImplicitSelectorExpression .
-    _operand: $ => prec(20,choice($._literal, $._operand_name, seq('(', $._expression, ')'),
+    _operand: $ => prec(30,choice($._literal, $._operand_name, seq('(', $._expression, ')'),
                            $.implicit_selector_expression)),
 
     _operand_name: $ => prec(30,alias($.identifier, $.operand_name)),
@@ -227,7 +227,26 @@ module.exports = grammar({
     implicit_selector_expression: $ => seq('.', $.identifier),
 
 // Literal = BasicLit | CompoundLit | ProcedureLit .
-    _literal: $ => choice($.basic_lit, $.procedure_lit),
+    _literal: $ => choice($.basic_lit, $._compound_lit, $.procedure_lit),
+
+// CompoundLit = LiteralType LiteralValue .
+// LiteralType =
+// 	StructType | UnionType | EnumType |
+// 	ArrayType | "[" "?" "]" ElementType |
+// 	SliceType | DynamicArrayType |
+// 	MapType |
+// 	BitFieldType |
+// 	BitSetType |
+// 	TypeName | CallExpr .
+
+// LiteralValue = "{" [ ElementList [ "," ] ] "}" .
+
+    _compound_lit: $ => seq($.literal_type, $.literal_value),
+    literal_type: $ => prec(40,choice($.struct_type, $.union_type, $.enum_type, $.array_type,
+                              seq('[','?',']',$._element_type),
+                              $.slice_type, $.dynamic_array_type, $.map_type, $.bitfield_type,
+                              $.bitset_type, $.type_name, $.call_expr)),
+    literal_value: $ => seq('{', optional(seq($.element_list)), '}'),
 
 // BasicLit = int_lit | float_lit | imaginary_lit | rune_lit | string_lit .
     basic_lit: $ => choice($.int_lit, $.float_lit, $.imaginary_lit, $.rune_lit, $.string_lit),
@@ -270,11 +289,11 @@ module.exports = grammar({
     assignment : $ => seq($.expression_list, $.assign_op, $.expression_list),
 
 // ProcedureGroup = "proc" "{" ExpressionList [ "," ]  "}" .
-    procedure_group : $ => seq('proc', '{', $.expression_list, optional(','), '}'),
+    procedure_group : $ => seq('proc', '{', $.expression_list, '}'),
 
-// ConstExpression = Expression | ProcedureGroup | "distinct" Type | "(" ConstExpression ")" .
+// ConstExpression = Expression | ProcedureGroup | ["distinct"] Type | "(" ConstExpression ")" .
 // ConstExpressionList = ConstExpression { "," ConstExpression } .
-    const_expression : $ => choice($._expression, $.procedure_group, seq('distinct', $.type), seq('(', $.const_expression, ')')),
+    const_expression : $ => choice($._expression, $.procedure_group, seq(optional('distinct'), $.type), seq('(', $.const_expression, ')')),
     const_expression_list : $ => seq($.const_expression, repeat(seq(',', $.const_expression))),
 
 // ConstDecl = IdentifierList ":" [ Type ] ":" ConstExpressionList .
@@ -508,7 +527,8 @@ module.exports = grammar({
     dynamic_array_type: $ => prec.right(seq('[dynamic]', $.type)),
     map_type: $ => prec.right(seq('map', '[', $.type, ']', $.type)),
     pointer_type: $ => prec.right(seq('^', $.type)),
-    bitset_key_type: $ => choice($.type, seq($._expression, $.range_op, $._expression)),
+    bitset_key_thing: $ => prec(60,seq($._expression, $.range_op, $._expression)),
+    bitset_key_type: $ => choice($.type, $.bitset_key_thing),
     bitset_type: $ => seq('bit_set', '[', $.bitset_key_type, optional(seq(';', $.type)), ']'),
     opaque_type: $ => prec.right(seq('opaque', $.type)),
     simd_vector_type: $ => seq('#', 'simd', $.array_type),
@@ -520,13 +540,11 @@ module.exports = grammar({
     //identifier list (put this somewhere else)
 // IdentifierList = identifier { "," identifier } .
 
-    identifier_list: $ => prec.right(20,seq($.identifier, repeat(seq(',', $.identifier)))),
-
+    identifier_list: $ => prec.right(40,seq($.identifier, repeat(seq(',', $.identifier)))),
 
 //expression list (put this somewhere else)
 // ExpressionList = Expression { "," Expression } .
     expression_list: $ => prec.right(seq($._expression, repeat(seq(',', $._expression)))),
-
 
 // WhereClause = "where" ExpressionList .
     where_clause: $ => seq('where', $.expression_list),
@@ -561,18 +579,23 @@ module.exports = grammar({
     union_type_tags : $ => choice(seq('#', 'align', $._expression), seq('#', 'no_nil'), seq('#', 'maybe')),
     bitfield_tags : $ => seq('#', 'align', $._expression),
     struct_field_decl : $ => seq(optional('using'), $.identifier_list, ':', $.type),
-    struct_field_list : $ => prec.right(seq($.struct_field_decl, repeat(seq(',', $.struct_field_decl)))),
+    struct_field_list : $ => prec.right(seq($.struct_field_decl, repeat(seq(',', $.struct_field_decl)), optional(','))),
     element : $ => seq($.identifier, optional(seq('=', $._expression))),
-    element_list : $ => prec.right(seq($.element, repeat(seq(',', $.element)))),
-    struct_type : $ => seq('struct', optional($.polymorphic_parameter_list),
-                                     optional($.struct_type_tags),
+    element_list : $ => prec.right(seq($.element, repeat(seq(',', $.element)), optional(','))),
+    struct_type : $ => seq('struct', optional($.polymorphic_parameter_list), optional($.struct_type_tags),
                                      optional($.where_clause),
-                            '{', $.struct_field_list, optional(','), '}'),
+                            '{', $.struct_field_list, '}'),
+    // struct_type : $ => seq('struct', '{', $.struct_field_list, optional(','), '}'),
+
+    // NOTE(lucypero): i have to make a special expression_list for union type for the optional comma.. this to avoid a treesitter bug
+    expression_list_optional_comma : $ => prec.right(seq($._expression, repeat(seq(',', $._expression)), optional(','))),
+
     union_type : $ => seq('union', optional($.polymorphic_parameter_list),
                                      optional($.union_type_tags),
                                      optional($.where_clause),
-                            '{', $.expression_list, optional(','), '}'),
-    enum_type : $ => seq('enum', optional($.type), '{', $.element_list, optional(','), '}'),
+                            '{', $.expression_list_optional_comma, '}'),
+
+    enum_type : $ => prec(30,seq('enum', optional($.type), '{', $.element_list, '}')),
 
 
 // BitFieldField = IdentifierList ":" Expression .
@@ -581,9 +604,8 @@ module.exports = grammar({
 // BitFieldType = "bit_field" (BitFieldTags) "{" BitFieldFields "}" .
 
     bitfield_field : $ => seq($.identifier_list, ':', $._expression),
-    bitfield_field_list : $ => prec.right(seq($.bitfield_field, repeat(seq(',', $.bitfield_field)))),
-    bitfield_fields : $ => seq($.bitfield_field_list, optional(',')),
-    bitfield_type : $ => seq('bit_field', optional($.bitfield_tags), '{', optional($.bitfield_fields), '}'),
+    bitfield_field_list : $ => prec.right(seq($.bitfield_field, repeat(seq(',', $.bitfield_field)), optional(','))),
+    bitfield_type : $ => seq('bit_field', optional($.bitfield_tags), '{', optional($.bitfield_field_list), '}'),
 
 // ProcedureTags = "#" "optional_ok" .
 // ProcedureType = "proc" Signature .
@@ -604,10 +626,11 @@ module.exports = grammar({
 // ParameterPrefixes = "using" | ("#" "no_alias") | ("#" "c_vararg") | "auto_cast" | ("#" "const") .
 // ParameterDecl = [ [ParameterPrefixes]  (IdentifierList | PolymorphicNameList) [ [":"] ".." TypeOrWithSpecialization ] ] .
 
+    // TODO(lucypero): something is wrong with parameter_decl.. a,b,c: int is parsed as 2 separate parameter_decl.. it should be one
     parameters : $ => seq('(', optional(seq($.parameter_list, optional(','))), ')'),
     parameter_list : $ => prec.right(seq($.parameter_decl, repeat(seq(',', $.parameter_decl)))),
     parameter_prefixes : $ => choice('using', seq('#', 'no_alias'), seq('#', 'c_vararg'), 'auto_cast', seq('#', 'const')),
-    parameter_decl : $ => seq(optional($.parameter_prefixes), choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization))),
+    parameter_decl : $ => seq(optional($.parameter_prefixes), choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), optional('..'), $.type_or_with_specialization))),
 
 // PlainParameters = "(" [ PlainParameterList [","] ] ")" .
 // PlainParameterList = PlainParameterDecl { "," PlainParameterDecl } .
@@ -615,7 +638,7 @@ module.exports = grammar({
 
     plain_parameters : $ => seq('(', optional(seq($.plain_parameter_list, optional(','))), ')'),
     plain_parameter_list : $ => prec.right(seq($.plain_parameter_decl, repeat(seq(',', $.plain_parameter_decl)))),
-    plain_parameter_decl : $ => seq(choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), '..', $.type_or_with_specialization))),
+    plain_parameter_decl : $ => seq(choice($.identifier_list, $.polymorphic_name_list), optional(seq(optional(':'), optional('..'), $.type_or_with_specialization))),
 
 
 // HelperType = "#" "type" Type .
@@ -647,7 +670,7 @@ module.exports = grammar({
       $.opaque_type, $.simd_vector_type, $.relative_pointer_type, $.relative_slice_type),
 
 // Type = TypeName | TypeLit | "(" Type ")" | HelperType | Expression .
-    type: $ => choice($.type_name, $._type_literal, seq("(", $.type, ")"), $.helper_type, $._expression),
+    type: $ => prec(50,choice($.type_name, $._type_literal, seq("(", $.type, ")"), $.helper_type, $._expression)),
   }
 });
 
